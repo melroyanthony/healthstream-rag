@@ -9,7 +9,7 @@ import re
 PHI_PATTERNS = [
     (r"\b\d{3}-\d{2}-\d{4}\b", "[REDACTED_SSN]"),
     (r"\b\d{3}-\d{3}-\d{4}\b", "[REDACTED_PHONE]"),
-    (r"\b[A-Z][a-z]+ [A-Z][a-z]+\b", "[REDACTED_NAME]"),
+    (r"\b(?:Name|Patient|Mr|Mrs|Ms|Dr)[:\s]+[A-Z][a-z]+ [A-Z][a-z]+\b", "[REDACTED_NAME]"),
     (r"\b\d{1,2}/\d{1,2}/\d{4}\b", "[REDACTED_DOB]"),
     (r"\b\d{1,2}-\d{1,2}-\d{4}\b", "[REDACTED_DOB]"),
     (r"\bMRN[:\s]*\d+\b", "[REDACTED_MRN]"),

@@ -25,5 +25,5 @@ def query_health_data(
         question=request.question,
         patient_id=patient_id,
         collection_name=request.collection_name,
-        top_k=request.top_k,
+        rerank_top_k=request.top_k,
     )

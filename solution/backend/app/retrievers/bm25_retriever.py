@@ -27,11 +27,9 @@ class BM25Retriever:
         top_k: int = 20,
     ) -> list[VectorSearchResult]:
         """Retrieve documents via BM25 keyword scoring."""
-        all_docs = self._vector_db.query(
+        all_docs = self._vector_db.list_data_point_vectors(
             collection_name=collection_name,
-            query_embedding=[0.0] * 384,
             patient_id=patient_id,
-            top_k=1000,
         )
 
         if not all_docs:

@@ -15,8 +15,10 @@ class S3VectorsVectorDB(BaseVectorDB):
     Available in eu-west-1 (Ireland).
 
     HIPAA note: PHIRedactionParser runs BEFORE this class.
-    Only de-identified embeddings reach S3 Vectors.
-    patient_id in metadata is always a hash, never the raw identifier.
+    Only de-identified text reaches S3 Vectors.
+    patient_id is passed through from JWT claims. In production,
+    a hashing layer should be applied before storage if required
+    by the deployment's threat model.
     """
 
     def __init__(
@@ -83,7 +85,7 @@ class S3VectorsVectorDB(BaseVectorDB):
         vectors = []
         for i, doc_id in enumerate(ids):
             meta = metadatas[i].copy()
-            meta["document"] = documents[i]
+            meta["document_ref"] = doc_id
             vectors.append({
                 "key": doc_id,
                 "data": {"float32": embeddings[i]},
@@ -127,7 +129,7 @@ class S3VectorsVectorDB(BaseVectorDB):
         results = []
         for hit in response.get("vectors", []):
             meta = hit.get("metadata", {})
-            text = meta.pop("document", "")
+            text = meta.pop("document_ref", "")
             results.append(
                 VectorSearchResult(
                     id=hit["key"],
@@ -158,3 +160,20 @@ class S3VectorsVectorDB(BaseVectorDB):
             indexName=f"{self._index_name}-{collection_name}",
         )
         return response.get("vectorCount", 0)
+
+    def list_data_point_vectors(
+        self, collection_name: str, patient_id: str
+    ) -> list[VectorSearchResult]:
+        """List all vectors for a patient (for BM25 corpus building)."""
+        return self.query(
+            collection_name=collection_name,
+            query_embedding=[],
+            patient_id=patient_id,
+            top_k=1000,
+        )
+
+    def delete_data_point_vectors(
+        self, collection_name: str, ids: list[str]
+    ) -> int:
+        """Delete specific data point vectors."""
+        return self.delete_documents(collection_name, ids)

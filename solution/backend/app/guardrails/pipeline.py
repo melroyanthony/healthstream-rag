@@ -22,7 +22,7 @@ DENIED_TOPICS = [
 PHI_ENTITY_PATTERNS = [
     r"\b\d{3}-\d{2}-\d{4}\b",  # SSN
     r"\b\d{3}-\d{3}-\d{4}\b",  # Phone
-    r"\bMRN[:\s]?\d+\b",       # Medical Record Number
+    r"\bMRN[:\s]*\d+\b",       # Medical Record Number
 ]
 
 

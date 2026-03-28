@@ -96,3 +96,28 @@ class ChromaVectorDB(BaseVectorDB):
         """Return vector count in collection."""
         collection = self._client.get_or_create_collection(name=collection_name)
         return collection.count()
+
+    def list_data_point_vectors(
+        self, collection_name: str, patient_id: str
+    ) -> list[VectorSearchResult]:
+        """List all vectors for a patient (used for BM25 corpus building)."""
+        collection = self._client.get_or_create_collection(name=collection_name)
+        results = collection.get(
+            where={"patient_id": patient_id},
+            include=["documents", "metadatas"],
+        )
+        return [
+            VectorSearchResult(
+                id=results["ids"][i],
+                text=results["documents"][i] if results["documents"] else "",
+                metadata=results["metadatas"][i] if results["metadatas"] else {},
+                score=0.0,
+            )
+            for i in range(len(results["ids"]))
+        ]
+
+    def delete_data_point_vectors(
+        self, collection_name: str, ids: list[str]
+    ) -> int:
+        """Delete specific data point vectors."""
+        return self.delete_documents(collection_name, ids)

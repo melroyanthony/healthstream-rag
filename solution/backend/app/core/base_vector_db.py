@@ -70,3 +70,15 @@ class BaseVectorDB(ABC):
     @abstractmethod
     def collection_count(self, collection_name: str) -> int:
         """Return the number of vectors in a collection."""
+
+    @abstractmethod
+    def list_data_point_vectors(
+        self, collection_name: str, patient_id: str
+    ) -> list[VectorSearchResult]:
+        """List all vectors for a patient in a collection (for BM25 corpus)."""
+
+    @abstractmethod
+    def delete_data_point_vectors(
+        self, collection_name: str, ids: list[str]
+    ) -> int:
+        """Delete specific data point vectors. Returns count deleted."""

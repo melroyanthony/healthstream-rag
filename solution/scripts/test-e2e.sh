@@ -58,11 +58,13 @@ check "POST /api/v1/ingest" "200" "$CODE"
 
 # 3. Query health data
 echo "3. Query Health Data"
-RESPONSE=$(curl -s -X POST "$BASE_URL/api/v1/query" \
+RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/api/v1/query" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer patient-test-e2e" \
   -d '{"question": "What was my sleep score?"}')
-CODE=$(echo "$RESPONSE" | python3 -c "import sys,json; print('200')" 2>/dev/null || echo "500")
+HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+RESPONSE=$(echo "$RESPONSE" | sed '$d')
+CODE="$HTTP_CODE"
 HAS_ANSWER=$(echo "$RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); print('yes' if 'answer' in d else 'no')" 2>/dev/null || echo "no")
 if [ "$HAS_ANSWER" = "yes" ]; then
     echo "  PASS: POST /api/v1/query returns answer"

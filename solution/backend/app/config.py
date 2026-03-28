@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     app_version: str = "1.0.0"
     debug: bool = False
 
-    # Vector backend: chroma | s3vectors | opensearch
+    # Vector backend: chroma | s3vectors (opensearch planned, not yet implemented)
     vector_backend: str = "chroma"
 
     # LLM backend: anthropic | bedrock

@@ -28,9 +28,9 @@ def vector_db(chroma_dir):
     return ChromaVectorDB(persist_directory=chroma_dir)
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def embedder():
-    """Local embedder instance."""
+    """Session-scoped local embedder (model loaded once)."""
     from app.embedders.local_embedder import LocalEmbedder
 
     return LocalEmbedder()

@@ -45,9 +45,14 @@ class QueryController:
         question: str,
         patient_id: str,
         collection_name: str = "default",
-        top_k: int = 5,
+        rerank_top_k: int = 5,
     ) -> QueryResponse:
-        """Execute full RAG pipeline."""
+        """Execute full RAG pipeline.
+
+        Args:
+            rerank_top_k: Number of results after reranking (returned to user).
+                Retrieval size is controlled by settings.retrieval_top_k.
+        """
         start = time.time()
 
         retrieved = self._hybrid.retrieve(
@@ -60,7 +65,7 @@ class QueryController:
         reranked = self._reranker.rerank(
             query=question,
             results=retrieved,
-            top_k=top_k,
+            top_k=rerank_top_k,
         )
 
         context_chunks = [r.text for r in reranked]
