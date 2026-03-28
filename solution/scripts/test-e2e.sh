@@ -97,24 +97,31 @@ fi
 
 # 4. Create collection
 echo "4. Create Collection"
-CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE_URL/api/v1/collections" \
+CODE=$(curl -s $CURL_OPTS -o /dev/null -w "%{http_code}" -X POST "$BASE_URL/api/v1/collections" \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer admin-e2e" \
   -d '{"name": "e2e-test", "dimension": 384}')
 check "POST /api/v1/collections" "201" "$CODE"
 
 # 5. List collections
 echo "5. List Collections"
-CODE=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/api/v1/collections")
+CODE=$(curl -s $CURL_OPTS -o /dev/null -w "%{http_code}" \
+  -H "Authorization: Bearer admin-e2e" \
+  "$BASE_URL/api/v1/collections")
 check "GET /api/v1/collections" "200" "$CODE"
 
 # 6. Delete collection
 echo "6. Delete Collection"
-CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "$BASE_URL/api/v1/collections/e2e-test")
+CODE=$(curl -s $CURL_OPTS -o /dev/null -w "%{http_code}" -X DELETE \
+  -H "Authorization: Bearer admin-e2e" \
+  "$BASE_URL/api/v1/collections/e2e-test")
 check "DELETE /api/v1/collections/e2e-test" "204" "$CODE"
 
 # 7. Verify deletion (should 404)
 echo "7. Verify Deletion"
-CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "$BASE_URL/api/v1/collections/e2e-test")
+CODE=$(curl -s $CURL_OPTS -o /dev/null -w "%{http_code}" -X DELETE \
+  -H "Authorization: Bearer admin-e2e" \
+  "$BASE_URL/api/v1/collections/e2e-test")
 check "DELETE /api/v1/collections/e2e-test (deleted)" "404" "$CODE"
 
 echo ""
