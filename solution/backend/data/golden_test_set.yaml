@@ -1,0 +1,108 @@
+---
+# Golden test set: 15 curated Q&A pairs with ground truth
+# Used for RAGAS evaluation and regression testing
+
+- id: health-001
+  question: "What was my average sleep score last week?"
+  ground_truth: "Your average myAir score was approximately 82 out of 100 last week, based on 5 nights of recorded therapy data."
+  source_type: healthkit
+  patient_id: synthetic-patient-001
+  expected_citations: ["myair_session_2026-03-21", "myair_session_2026-03-22", "myair_session_2026-03-23", "weekly_summary_2026-03-23"]
+
+- id: health-002
+  question: "What medications am I currently prescribed?"
+  ground_truth: "You have an active prescription for CPAP therapy equipment (AirSense 11 AutoSet)."
+  source_type: fhir
+  patient_id: synthetic-patient-001
+  expected_citations: ["MedicationRequest/med-001"]
+
+- id: health-003
+  question: "What is my AHI on therapy?"
+  ground_truth: "Your current AHI on CPAP therapy ranges from 2-4 events per hour, which is well-controlled."
+  source_type: fhir
+  patient_id: synthetic-patient-001
+  expected_citations: ["Condition/cond-001"]
+
+- id: health-004
+  question: "How many hours did I use my CPAP last night?"
+  ground_truth: "Your most recent recorded session on March 25 showed 6.9 hours of therapy usage."
+  source_type: healthkit
+  patient_id: synthetic-patient-001
+  expected_citations: ["myair_session_2026-03-25"]
+
+- id: health-005
+  question: "What was my best sleep session this week?"
+  ground_truth: "Your best session was on March 23 with a myAir score of 92/100, 8.1 hours of therapy, and an AHI of 1.8."
+  source_type: healthkit
+  patient_id: synthetic-patient-001
+  expected_citations: ["myair_session_2026-03-23"]
+
+- id: health-006
+  question: "Do I have any upcoming appointments?"
+  ground_truth: "Your care plan shows the next review is scheduled for June 15, 2026."
+  source_type: fhir
+  patient_id: synthetic-patient-001
+  expected_citations: ["CarePlan/plan-001"]
+
+- id: health-007
+  question: "What is my diagnosis?"
+  ground_truth: "You have been diagnosed with moderate Obstructive Sleep Apnea (ICD-10: G47.33), confirmed via polysomnography."
+  source_type: fhir
+  patient_id: synthetic-patient-001
+  expected_citations: ["Condition/cond-001"]
+
+- id: health-008
+  question: "Has my mask seal improved?"
+  ground_truth: "The weekly summary notes improving mask seal quality. Recent sessions show Good to Excellent seal ratings."
+  source_type: healthkit
+  patient_id: synthetic-patient-001
+  expected_citations: ["weekly_summary_2026-03-23", "myair_session_2026-03-23"]
+
+- id: health-009
+  question: "What was my compliance rate?"
+  ground_truth: "Your compliance rate was 100% - you used CPAP therapy all 7 nights last week."
+  source_type: healthkit
+  patient_id: synthetic-patient-001
+  expected_citations: ["weekly_summary_2026-03-23"]
+
+- id: health-010
+  question: "How has my daytime sleepiness changed?"
+  ground_truth: "Your Epworth Sleepiness Scale score improved from 14 (moderate) to 6 (normal) since starting CPAP therapy."
+  source_type: ehr
+  patient_id: synthetic-patient-001
+  expected_citations: ["clinical_note_2026-02-15"]
+
+- id: health-011
+  question: "What device am I using?"
+  ground_truth: "You are using an AirSense 11 AutoSet with pressure range of 8-14 cmH2O."
+  source_type: healthkit
+  patient_id: synthetic-patient-001
+  expected_citations: ["myair_session_2026-03-21"]
+
+- id: health-012
+  question: "What are my therapy goals?"
+  ground_truth: "Your goals are to maintain AHI below 5 events/hour and achieve compliance above 70% with at least 4 hours usage per night."
+  source_type: fhir
+  patient_id: synthetic-patient-001
+  expected_citations: ["CarePlan/plan-001"]
+
+- id: health-013
+  question: "What was my AHI at diagnosis?"
+  ground_truth: "Your AHI at diagnosis was 22 events per hour, classified as moderate obstructive sleep apnea."
+  source_type: fhir
+  patient_id: synthetic-patient-001
+  expected_citations: ["Condition/cond-001"]
+
+- id: health-014
+  question: "Are there any side effects from my CPAP?"
+  ground_truth: "According to your clinical notes, no side effects have been reported. The mask fit is comfortable."
+  source_type: ehr
+  patient_id: synthetic-patient-001
+  expected_citations: ["clinical_note_2026-02-15"]
+
+- id: health-015
+  question: "What was my leak rate on March 22?"
+  ground_truth: "Your leak rate on March 22 was 18 L/min, which was slightly elevated."
+  source_type: healthkit
+  patient_id: synthetic-patient-001
+  expected_citations: ["myair_session_2026-03-22"]

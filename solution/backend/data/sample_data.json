@@ -1,0 +1,77 @@
+{
+  "patients": {
+    "synthetic-patient-001": {
+      "documents": [
+        {
+          "text": "Sleep session recorded on 2026-03-21. myAir score: 85/100. Therapy hours: 7.2 hours. Mask seal: Good. AHI (Apnea-Hypopnea Index): 3.2 events/hour. Device: AirSense 11 AutoSet. Pressure range: 8-14 cmH2O. Leak rate: 12 L/min (acceptable). Usage: Continuous positive airway pressure therapy for obstructive sleep apnea.",
+          "source_type": "healthkit",
+          "source_id": "myair_session_2026-03-21"
+        },
+        {
+          "text": "Sleep session recorded on 2026-03-22. myAir score: 78/100. Therapy hours: 6.5 hours. Mask seal: Fair. AHI: 4.1 events/hour. Device: AirSense 11 AutoSet. Pressure range: 8-14 cmH2O. Leak rate: 18 L/min (slightly elevated). Events detected: 2 central apneas, 8 obstructive hypopneas.",
+          "source_type": "healthkit",
+          "source_id": "myair_session_2026-03-22"
+        },
+        {
+          "text": "Sleep session recorded on 2026-03-23. myAir score: 92/100. Therapy hours: 8.1 hours. Mask seal: Excellent. AHI: 1.8 events/hour. Device: AirSense 11 AutoSet. Pressure range: 8-14 cmH2O. Leak rate: 8 L/min (good). This was the best session this week.",
+          "source_type": "healthkit",
+          "source_id": "myair_session_2026-03-23"
+        },
+        {
+          "text": "Sleep session recorded on 2026-03-24. myAir score: 88/100. Therapy hours: 7.8 hours. Mask seal: Good. AHI: 2.5 events/hour. Device: AirSense 11 AutoSet. Consistent therapy usage pattern maintained.",
+          "source_type": "healthkit",
+          "source_id": "myair_session_2026-03-24"
+        },
+        {
+          "text": "Sleep session recorded on 2026-03-25. myAir score: 80/100. Therapy hours: 6.9 hours. Mask seal: Good. AHI: 3.5 events/hour. Device: AirSense 11 AutoSet.",
+          "source_type": "healthkit",
+          "source_id": "myair_session_2026-03-25"
+        },
+        {
+          "text": "FHIR R4 MedicationRequest: Active prescription for CPAP therapy equipment (AirSense 11 AutoSet). Prescribed by Dr. Sleep Medicine. Start date: 2025-06-15. Status: active. Diagnosis: Obstructive Sleep Apnea (ICD-10: G47.33). Insurance: Covered under durable medical equipment benefit.",
+          "source_type": "fhir",
+          "source_id": "MedicationRequest/med-001"
+        },
+        {
+          "text": "FHIR R4 Condition: Obstructive Sleep Apnea, moderate severity. ICD-10: G47.33. Onset: 2024-11-01. Clinical status: active. Verification: confirmed via polysomnography. AHI at diagnosis: 22 events/hour (moderate). Current AHI on CPAP therapy: 2-4 events/hour (well-controlled).",
+          "source_type": "fhir",
+          "source_id": "Condition/cond-001"
+        },
+        {
+          "text": "FHIR R4 CarePlan: Sleep apnea management plan. Goals: maintain AHI below 5 events/hour, achieve therapy compliance above 70% of nights with at least 4 hours usage. Activities: nightly CPAP therapy, monthly myAir score review, annual sleep study. Next review: 2026-06-15.",
+          "source_type": "fhir",
+          "source_id": "CarePlan/plan-001"
+        },
+        {
+          "text": "Weekly sleep summary: March 17-23, 2026. Average myAir score: 82/100. Average therapy hours: 7.0 hours/night. Average AHI: 3.0 events/hour. Compliance: 7/7 nights (100%). Trend: Improving mask seal quality. Recommendation: Continue current therapy settings.",
+          "source_type": "healthkit",
+          "source_id": "weekly_summary_2026-03-23"
+        },
+        {
+          "text": "EHR Clinical Note: Patient reports improved daytime alertness since starting CPAP therapy. Epworth Sleepiness Scale score improved from 14 (moderate) to 6 (normal). No side effects reported. Mask fit is comfortable. Patient is compliant with nightly usage.",
+          "source_type": "ehr",
+          "source_id": "clinical_note_2026-02-15"
+        }
+      ]
+    },
+    "synthetic-patient-002": {
+      "documents": [
+        {
+          "text": "Sleep session recorded on 2026-03-21. myAir score: 65/100. Therapy hours: 4.2 hours. Mask seal: Poor. AHI: 8.5 events/hour. Device: AirSense 11 AutoSet. Leak rate: 32 L/min (high). Mask adjustment recommended.",
+          "source_type": "healthkit",
+          "source_id": "myair_session_2026-03-21_p2"
+        },
+        {
+          "text": "FHIR R4 Condition: Severe Obstructive Sleep Apnea. ICD-10: G47.33. AHI at diagnosis: 45 events/hour (severe). Current AHI on CPAP: 8-12 events/hour (suboptimal). Pressure adjustment may be needed.",
+          "source_type": "fhir",
+          "source_id": "Condition/cond-002"
+        },
+        {
+          "text": "FHIR R4 MedicationRequest: Active prescription for bilevel positive airway pressure (BiPAP) equipment. Under evaluation for switching from CPAP to BiPAP due to persistent central apneas.",
+          "source_type": "fhir",
+          "source_id": "MedicationRequest/med-002"
+        }
+      ]
+    }
+  }
+}
