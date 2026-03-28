@@ -77,6 +77,12 @@ def test_nonexistent_patient_returns_empty(vector_db, embedder):
 
 
 def test_patient_id_from_mock_jwt(client):
-    """Should extract patient_id from mock Bearer token."""
-    response = client.get("/health")
+    """Should extract patient_id from Bearer token in mock auth mode."""
+    response = client.post(
+        "/api/v1/query",
+        json={"question": "What is my sleep score?"},
+        headers={"Authorization": "Bearer synthetic-patient-001"},
+    )
     assert response.status_code == 200
+    data = response.json()
+    assert "answer" in data

@@ -65,6 +65,7 @@ RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/api/v1/query" \
 HTTP_CODE=$(echo "$RESPONSE" | tail -1)
 RESPONSE=$(echo "$RESPONSE" | sed '$d')
 CODE="$HTTP_CODE"
+check "POST /api/v1/query (status)" "200" "$HTTP_CODE"
 HAS_ANSWER=$(echo "$RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); print('yes' if 'answer' in d else 'no')" 2>/dev/null || echo "no")
 if [ "$HAS_ANSWER" = "yes" ]; then
     echo "  PASS: POST /api/v1/query returns answer"

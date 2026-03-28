@@ -175,7 +175,10 @@ class S3VectorsVectorDB(BaseVectorDB):
         if not self._client:
             return []
         import random
-        dim = 1024
+
+        from app.config import settings
+
+        dim = settings.bedrock_embedding_dimension
         random_vec = [random.gauss(0, 1) for _ in range(dim)]
         norm = sum(x * x for x in random_vec) ** 0.5
         unit_vec = [x / norm for x in random_vec]
