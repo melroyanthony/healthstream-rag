@@ -37,12 +37,11 @@ def embedder():
 
 
 @pytest.fixture
-def client(chroma_dir):
+def client(chroma_dir, embedder):
     """FastAPI test client with fresh dependencies per test."""
     from app.api.dependencies import get_embedder, get_query_controller, get_vector_db
     from app.api.main import create_app
     from app.api.query_controller import QueryController
-    from app.embedders.local_embedder import LocalEmbedder
     from app.generators.anthropic_generator import AnthropicGenerator
     from app.vector_db.chroma_db import ChromaVectorDB
 
@@ -51,13 +50,12 @@ def client(chroma_dir):
     get_query_controller.cache_clear()
 
     _db = ChromaVectorDB(persist_directory=chroma_dir)
-    _emb = LocalEmbedder()
     _gen = AnthropicGenerator(api_key="", model="claude-haiku-4-5-20250315")
-    _controller = QueryController(vector_db=_db, embedder=_emb, generator=_gen)
+    _controller = QueryController(vector_db=_db, embedder=embedder, generator=_gen)
 
     app = create_app()
     app.dependency_overrides[get_vector_db] = lambda: _db
-    app.dependency_overrides[get_embedder] = lambda: _emb
+    app.dependency_overrides[get_embedder] = lambda: embedder
     app.dependency_overrides[get_query_controller] = lambda: _controller
 
     with TestClient(app) as tc:
