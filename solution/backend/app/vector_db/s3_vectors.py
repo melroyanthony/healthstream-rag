@@ -39,15 +39,18 @@ class S3VectorsVectorDB(BaseVectorDB):
             self._client = None
 
     def create_collection(self, name: str, dimension: int) -> None:
-        """Create an S3 Vectors index."""
+        """Create an S3 Vectors index (idempotent)."""
         if not self._client:
             return
-        self._client.create_vector_index(
-            vectorBucketName=self._bucket_name,
-            indexName=f"{self._index_name}-{name}",
-            dimension=dimension,
-            distanceMetric="cosine",
-        )
+        try:
+            self._client.create_vector_index(
+                vectorBucketName=self._bucket_name,
+                indexName=f"{self._index_name}-{name}",
+                dimension=dimension,
+                distanceMetric="cosine",
+            )
+        except self._client.exceptions.ConflictException:
+            pass
 
     def delete_collection(self, name: str) -> None:
         """Delete an S3 Vectors index."""

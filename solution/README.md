@@ -166,7 +166,7 @@ solution/
 │   └── test-e2e.sh            # E2E happy path test
 ├── checkpoints/               # Stage validation reports
 ├── .github/workflows/ci.yml   # CI/CD pipeline
-├── docker-compose.yml         # Local dev: FastAPI + ChromaDB
+├── docker-compose.yml         # Local dev: FastAPI backend (embedded ChromaDB)
 ├── README.md                  # This file
 └── CHANGELOG.md
 ```

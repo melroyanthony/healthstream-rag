@@ -68,7 +68,9 @@ class QueryController:
             top_k=rerank_top_k,
         )
 
-        context_chunks = [r.text for r in reranked]
+        context_chunks = [
+            f"[{r.metadata.get('source_id', r.id)}] {r.text}" for r in reranked
+        ]
         answer = self._generator.generate(
             system_prompt="",
             user_message=question,

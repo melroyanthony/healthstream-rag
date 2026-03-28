@@ -86,6 +86,8 @@ def test_query_respects_patient_isolation(client):
         json={"question": "What is my sleep score?"},
     )
     data = response.json()
-    # Patient B has no data, so citations should be empty
-    for citation in data["citations"]:
-        assert "Patient A" not in citation["text_snippet"]
+    # Patient B has no data — citations must be empty
+    assert len(data["citations"]) == 0, (
+        f"Expected 0 citations for patient-B, got {len(data['citations'])}"
+    )
+    assert data["metadata"]["retrieval_count"] == 0
