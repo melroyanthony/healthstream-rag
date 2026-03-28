@@ -51,12 +51,29 @@ class HybridRetriever:
 
         return self._merge_and_deduplicate(vector_results, bm25_results)
 
+    @staticmethod
+    def _normalize_scores(
+        results: list[VectorSearchResult],
+    ) -> list[VectorSearchResult]:
+        """Normalize scores to 0..1 range (min-max)."""
+        if not results:
+            return results
+        scores = [r.score for r in results]
+        min_s, max_s = min(scores), max(scores)
+        spread = max_s - min_s if max_s > min_s else 1.0
+        for r in results:
+            r.score = (r.score - min_s) / spread
+        return results
+
     def _merge_and_deduplicate(
         self,
         vector_results: list[VectorSearchResult],
         bm25_results: list[VectorSearchResult],
     ) -> list[VectorSearchResult]:
-        """Merge results, deduplicate by ID, keep highest score."""
+        """Merge results, deduplicate by ID, keep highest normalized score."""
+        vector_results = self._normalize_scores(vector_results)
+        bm25_results = self._normalize_scores(bm25_results)
+
         seen: dict[str, VectorSearchResult] = {}
 
         for result in vector_results:

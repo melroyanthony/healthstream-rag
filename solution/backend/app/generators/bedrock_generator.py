@@ -42,7 +42,10 @@ class BedrockGenerator(BaseGenerator):
         full_system = (system_prompt or SYSTEM_PROMPT).replace("{context}", context)
 
         if not self._client:
-            return "Bedrock client unavailable. Configure AWS credentials."
+            raise RuntimeError(
+                "Bedrock runtime client unavailable. "
+                "Configure AWS credentials or use LLM_BACKEND=anthropic."
+            )
 
         body = json.dumps({
             "anthropic_version": "bedrock-2023-05-31",

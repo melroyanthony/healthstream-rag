@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends
 from app.api.dependencies import get_embedder, get_vector_db
 from app.core.base_embedder import BaseEmbedder
 from app.core.base_vector_db import BaseVectorDB
+from app.config import settings
 from app.middleware.patient_isolation import get_patient_id
 from app.middleware.phi_redaction import redact_phi
 from app.models.schemas import IngestRequest, IngestResponse
@@ -32,7 +33,8 @@ def ingest_documents(
     metadatas = []
 
     for doc in request.documents:
-        redacted_text = redact_phi(doc.text)
+        use_comprehend = settings.embedder_backend == "bedrock"
+        redacted_text = redact_phi(doc.text, use_comprehend=use_comprehend)
 
         chunk_id = str(uuid.uuid4())
         ids.append(chunk_id)

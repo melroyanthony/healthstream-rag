@@ -43,6 +43,9 @@ def _redact_with_regex(text: str) -> str:
 
 def _redact_with_comprehend(text: str) -> str:
     """Production PHI redaction using AWS Comprehend Medical."""
+    import logging
+
+    logger = logging.getLogger(__name__)
     try:
         import boto3
 
@@ -62,4 +65,9 @@ def _redact_with_comprehend(text: str) -> str:
 
         return redacted
     except Exception:
+        logger.error(
+            "Comprehend Medical failed — falling back to regex redaction. "
+            "PHI may not be fully redacted. Review immediately.",
+            exc_info=True,
+        )
         return _redact_with_regex(text)

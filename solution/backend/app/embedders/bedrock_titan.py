@@ -38,7 +38,10 @@ class BedrockTitanEmbedder(BaseEmbedder):
     def embed_query(self, text: str) -> list[float]:
         """Embed a single query via Bedrock Titan V2."""
         if not self._client:
-            return [0.0] * self._dim
+            raise RuntimeError(
+                "Bedrock runtime client unavailable. "
+                "Configure AWS credentials or use EMBEDDER_BACKEND=local."
+            )
         response = self._client.invoke_model(
             modelId=self._model_id,
             body=json.dumps({"inputText": text}),
