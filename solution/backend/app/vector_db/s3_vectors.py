@@ -85,7 +85,7 @@ class S3VectorsVectorDB(BaseVectorDB):
         vectors = []
         for i, doc_id in enumerate(ids):
             meta = metadatas[i].copy()
-            meta["document_ref"] = doc_id
+            meta["_text"] = documents[i]
             vectors.append({
                 "key": doc_id,
                 "data": {"float32": embeddings[i]},
@@ -129,7 +129,7 @@ class S3VectorsVectorDB(BaseVectorDB):
         results = []
         for hit in response.get("vectors", []):
             meta = hit.get("metadata", {})
-            text = meta.pop("document_ref", "")
+            text = meta.pop("_text", "")
             results.append(
                 VectorSearchResult(
                     id=hit["key"],
@@ -164,10 +164,24 @@ class S3VectorsVectorDB(BaseVectorDB):
     def list_data_point_vectors(
         self, collection_name: str, patient_id: str
     ) -> list[VectorSearchResult]:
-        """List all vectors for a patient (for BM25 corpus building)."""
+        """List all vectors for a patient (for BM25 corpus building).
+
+        Note: S3 Vectors does not natively support scan/list with filter.
+        In production, the BM25 corpus should be stored in DynamoDB
+        (patient_id PK, chunk_id SK) and loaded directly, bypassing
+        the vector store entirely. This implementation uses the query
+        API with a random unit vector as a workaround for the demo.
+        """
+        if not self._client:
+            return []
+        import random
+        dim = 1024
+        random_vec = [random.gauss(0, 1) for _ in range(dim)]
+        norm = sum(x * x for x in random_vec) ** 0.5
+        unit_vec = [x / norm for x in random_vec]
         return self.query(
             collection_name=collection_name,
-            query_embedding=[],
+            query_embedding=unit_vec,
             patient_id=patient_id,
             top_k=1000,
         )

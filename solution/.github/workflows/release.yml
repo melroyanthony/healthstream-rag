@@ -24,7 +24,7 @@ jobs:
       - name: Parse commit and determine version bump
         id: bump
         run: |
-          CURRENT_VERSION=$(cat .version 2>/dev/null || echo "0.0.0" | tr -d '[:space:]')
+          CURRENT_VERSION=$(cat solution/.version 2>/dev/null || echo "0.0.0" | tr -d '[:space:]')
           COMMIT_MSG=$(git log -1 --pretty=%B)
           FIRST_LINE=$(echo "$COMMIT_MSG" | head -1)
 
@@ -85,28 +85,28 @@ jobs:
 
           CLEAN_MSG=$(echo "$COMMIT_MSG" | sed -E 's/^[a-z]+(!?\([^)]+\))?!?:\s*//')
 
-          echo "$NEW_VERSION" > .version
+          echo "$NEW_VERSION" > solution/.version
 
           CHANGELOG_URL="https://github.com/${{ github.repository }}/releases/tag/v${NEW_VERSION}"
 
-          if [ -f CHANGELOG.md ]; then
+          if [ -f solution/CHANGELOG.md ]; then
             tmp_changelog="$(mktemp)"
             {
-              head -n 1 CHANGELOG.md
+              head -n 1 solution/CHANGELOG.md
               printf '\n'
               printf '## [%s](%s) (%s)\n\n' "$NEW_VERSION" "$CHANGELOG_URL" "$DATE"
               printf '### %s\n\n' "$SECTION"
               printf '* %s\n' "$CLEAN_MSG"
-              tail -n +2 CHANGELOG.md
+              tail -n +2 solution/CHANGELOG.md
             } > "$tmp_changelog"
-            mv "$tmp_changelog" CHANGELOG.md
+            mv "$tmp_changelog" solution/CHANGELOG.md
           else
             {
               printf '# Changelog\n\n'
               printf '## [%s](%s) (%s)\n\n' "$NEW_VERSION" "$CHANGELOG_URL" "$DATE"
               printf '### %s\n\n' "$SECTION"
               printf '* %s\n' "$CLEAN_MSG"
-            } > CHANGELOG.md
+            } > solution/CHANGELOG.md
           fi
 
       - name: Commit, tag, and release
@@ -119,7 +119,7 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .version CHANGELOG.md
+          git add solution/.version solution/CHANGELOG.md
           git commit -m "chore(release): ${TAG}"
 
           if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null 2>&1; then

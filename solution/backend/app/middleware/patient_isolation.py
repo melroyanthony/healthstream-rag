@@ -22,8 +22,8 @@ def get_patient_id(authorization: str = Header(default="")) -> str:
     """
     if settings.mock_auth:
         if authorization and authorization.startswith("Bearer "):
-            token = authorization.removeprefix("Bearer ")
-            if token.startswith("patient-"):
+            token = authorization.removeprefix("Bearer ").strip()
+            if token:
                 return token
         return settings.default_patient_id
 

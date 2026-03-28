@@ -53,7 +53,7 @@ class Settings(BaseSettings):
     )
 
     # Security
-    mock_auth: bool = True
+    mock_auth: bool = False
     default_patient_id: str = "synthetic-patient-001"
 
     model_config = {"env_prefix": "", "env_file": ".env", "extra": "ignore"}

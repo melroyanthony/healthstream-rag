@@ -45,7 +45,11 @@ def ingest_documents(
             "chunk_index": 0,
         }
         if doc.metadata:
-            safe_meta = {k: str(v) for k, v in doc.metadata.items()}
+            reserved_keys = {"patient_id", "source_type", "source_id", "chunk_index"}
+            safe_meta = {
+                k: str(v) for k, v in doc.metadata.items()
+                if k not in reserved_keys
+            }
             metadata.update(safe_meta)
         metadatas.append(metadata)
 
