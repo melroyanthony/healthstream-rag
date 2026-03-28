@@ -64,10 +64,11 @@ def _redact_with_comprehend(text: str) -> str:
             redacted = redacted[:begin] + f"[REDACTED_{entity_type}]" + redacted[end:]
 
         return redacted
-    except Exception:
+    except Exception as exc:
         logger.error(
             "Comprehend Medical failed — falling back to regex redaction. "
-            "PHI may not be fully redacted. Review immediately.",
-            exc_info=True,
+            "PHI may not be fully redacted. Review immediately. "
+            "Error: %s",
+            type(exc).__name__,
         )
         return _redact_with_regex(text)

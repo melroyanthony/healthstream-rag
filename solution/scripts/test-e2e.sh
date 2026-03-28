@@ -25,18 +25,20 @@ check() {
     fi
 }
 
+CURL_OPTS="--connect-timeout 5 --max-time 30"
+
 echo "=== HealthStream RAG E2E Happy Path ==="
 echo "Target: $BASE_URL"
 echo ""
 
 # 1. Health check
 echo "1. Health Check"
-CODE=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/health")
+CODE=$(curl -s $CURL_OPTS -o /dev/null -w "%{http_code}" "$BASE_URL/health")
 check "GET /health" "200" "$CODE"
 
 # 2. Ingest documents for patient
 echo "2. Ingest Documents"
-CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE_URL/api/v1/ingest" \
+CODE=$(curl -s $CURL_OPTS -o /dev/null -w "%{http_code}" -X POST "$BASE_URL/api/v1/ingest" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer patient-test-e2e" \
   -d '{
@@ -58,7 +60,7 @@ check "POST /api/v1/ingest" "200" "$CODE"
 
 # 3. Query health data
 echo "3. Query Health Data"
-RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/api/v1/query" \
+RESPONSE=$(curl -s $CURL_OPTS -w "\n%{http_code}" -X POST "$BASE_URL/api/v1/query" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer patient-test-e2e" \
   -d '{"question": "What was my sleep score?"}')
