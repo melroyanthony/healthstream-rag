@@ -1,10 +1,13 @@
 """Tests for document ingestion endpoint."""
 
+AUTH = {"Authorization": "Bearer test-patient"}
+
 
 def test_ingest_documents(client):
     """Should ingest documents and return count."""
     response = client.post(
         "/api/v1/ingest",
+        headers=AUTH,
         json={
             "documents": [
                 {
@@ -31,6 +34,7 @@ def test_ingest_validates_source_type(client):
     """Should reject invalid source types."""
     response = client.post(
         "/api/v1/ingest",
+        headers=AUTH,
         json={
             "documents": [
                 {
@@ -48,6 +52,7 @@ def test_ingest_requires_documents(client):
     """Should reject empty document list."""
     response = client.post(
         "/api/v1/ingest",
+        headers=AUTH,
         json={"documents": []},
     )
     assert response.status_code == 422

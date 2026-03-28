@@ -1,10 +1,13 @@
 """Tests for RAG query endpoint."""
 
+AUTH = {"Authorization": "Bearer test-patient"}
+
 
 def test_query_with_no_data_returns_response(client):
     """Should return a response even with no ingested data."""
     response = client.post(
         "/api/v1/query",
+        headers=AUTH,
         json={"question": "What was my sleep score?"},
     )
     assert response.status_code == 200
@@ -17,9 +20,9 @@ def test_query_with_no_data_returns_response(client):
 
 def test_query_with_data_returns_citations(client):
     """Should return citations when data is available."""
-    # Ingest some data first
     client.post(
         "/api/v1/ingest",
+        headers=AUTH,
         json={
             "documents": [
                 {
@@ -33,6 +36,7 @@ def test_query_with_data_returns_citations(client):
 
     response = client.post(
         "/api/v1/query",
+        headers=AUTH,
         json={"question": "What was my sleep score?"},
     )
     assert response.status_code == 200
@@ -45,6 +49,7 @@ def test_query_validates_question_length(client):
     """Should reject empty questions."""
     response = client.post(
         "/api/v1/query",
+        headers=AUTH,
         json={"question": ""},
     )
     assert response.status_code == 422
@@ -54,6 +59,7 @@ def test_query_includes_metadata(client):
     """Should include pipeline metadata in response."""
     response = client.post(
         "/api/v1/query",
+        headers=AUTH,
         json={"question": "What is my AHI?"},
     )
     data = response.json()
@@ -64,7 +70,6 @@ def test_query_includes_metadata(client):
 
 def test_query_respects_patient_isolation(client):
     """Should only return data for the authenticated patient."""
-    # Ingest data for patient-A
     client.post(
         "/api/v1/ingest",
         headers={"Authorization": "Bearer patient-A"},
@@ -79,14 +84,12 @@ def test_query_respects_patient_isolation(client):
         },
     )
 
-    # Query as patient-B should not find patient-A data
     response = client.post(
         "/api/v1/query",
         headers={"Authorization": "Bearer patient-B"},
         json={"question": "What is my sleep score?"},
     )
     data = response.json()
-    # Patient B has no data — citations must be empty
     assert len(data["citations"]) == 0, (
         f"Expected 0 citations for patient-B, got {len(data['citations'])}"
     )

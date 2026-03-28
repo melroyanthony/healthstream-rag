@@ -21,11 +21,13 @@ def get_patient_id(authorization: str = Header(default="")) -> str:
     It is ALWAYS extracted from the authenticated JWT.
     """
     if settings.mock_auth:
-        if authorization and authorization.startswith("Bearer "):
-            token = authorization.removeprefix("Bearer ").strip()
-            if token:
-                return token
-        return settings.default_patient_id
+        if not authorization or not authorization.startswith("Bearer "):
+            raise HTTPException(
+                status_code=401,
+                detail="Bearer token required (even in mock auth mode)",
+            )
+        token = authorization.removeprefix("Bearer ").strip()
+        return token if token else settings.default_patient_id
 
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Authentication required")

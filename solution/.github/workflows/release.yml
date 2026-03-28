@@ -24,7 +24,7 @@ jobs:
       - name: Parse commit and determine version bump
         id: bump
         run: |
-          CURRENT_VERSION=$(( cat solution/.version 2>/dev/null || echo "0.0.0" ) | tr -d '[:space:]')
+          CURRENT_VERSION=$( (cat solution/.version 2>/dev/null || echo "0.0.0") | tr -d '[:space:]')
           COMMIT_MSG=$(git log -1 --pretty=%B)
           FIRST_LINE=$(echo "$COMMIT_MSG" | head -1)
 
