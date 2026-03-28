@@ -86,7 +86,9 @@ def _check_grounding(response: str, context_chunks: list[str]) -> bool:
     stop_words = {"the", "a", "an", "is", "was", "are", "were", "and", "or", "in", "on", "at",
                   "to", "for", "of", "with", "by", "from", "your", "you", "i", "my", "this",
                   "that", "it", "be", "has", "have", "had", "do", "does", "did", "not", "no",
-                  "but", "if", "so", "as", "can", "will", "just", "than", "then", "now"}
+                  "but", "if", "so", "as", "can", "will", "just", "than", "then", "now",
+                  "based", "health", "records", "please", "consult", "care", "team",
+                  "information", "data", "available", "shows", "according"}
     content_words = response_words - stop_words
 
     if not content_words:

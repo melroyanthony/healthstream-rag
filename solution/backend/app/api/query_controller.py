@@ -36,7 +36,10 @@ class QueryController:
         self._generator = generator
 
         vector_retriever = VectorRetriever(vector_db, embedder)
-        bm25_retriever = BM25Retriever(vector_db) if settings.bm25_enabled else None
+        if settings.bm25_enabled and settings.vector_backend != "s3vectors":
+            bm25_retriever = BM25Retriever(vector_db)
+        else:
+            bm25_retriever = None
         self._hybrid = HybridRetriever(vector_retriever, bm25_retriever)
         self._reranker = SimpleReranker()
 
