@@ -68,7 +68,7 @@ C4Component
 Raw text with PHI
     |
     v
-PHIRedactionParser
+redact_phi()
     Phase 1: Regex patterns (local dev) / Comprehend Medical (when EMBEDDER_BACKEND=bedrock)
     Phase 2: Always Comprehend Medical
     - Names -> [REDACTED_NAME]

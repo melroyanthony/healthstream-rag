@@ -258,7 +258,7 @@ terraform apply healthstream.plan
 | Embeddings | sentence-transformers (384d) | Bedrock Titan V2 (1024d) | Done |
 | Reranker | SimpleReranker (Jaccard) | Cohere Rerank (Bedrock) | Phase 2 |
 | PHI Redaction | Regex patterns | AWS Comprehend Medical | Done (config-driven) |
-| Authentication | Mock (Bearer token = patient_id) | Cognito JWT (custom:patient_id) | Phase 2 |
+| Authentication | Mock (Bearer token = patient_id) | Cognito JWT (custom:patient_id) — not yet implemented | Phase 2 |
 | BM25 Retrieval | Enabled (ChromaDB corpus) | Disabled for S3 Vectors | Phase 2 (DynamoDB corpus) |
 | Data Loaders | Generic /api/v1/ingest endpoint | HealthKit/FHIR/EHR dedicated loaders | Phase 2 |
 | Infrastructure | Docker Compose | Terraform (5 modules, VPC, PrivateLink) | Done (scaffolding) |
