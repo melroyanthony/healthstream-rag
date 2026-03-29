@@ -72,7 +72,7 @@ resource "aws_s3_bucket_policy" "audit_logs" {
             "aws:SourceAccount" = data.aws_caller_identity.current.account_id
           }
           ArnLike = {
-            "aws:SourceArn" = aws_cloudtrail.audit.arn
+            "aws:SourceArn" = "arn:aws:cloudtrail:${var.aws_region}:${data.aws_caller_identity.current.account_id}:trail/healthstream-${var.environment}-audit"
           }
         }
       },

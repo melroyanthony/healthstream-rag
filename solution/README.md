@@ -235,11 +235,16 @@ All configuration via environment variables (see `backend/.env.example`):
 
 ## AWS Deployment (Terraform)
 
+> **Note:** Terraform provisions infrastructure scaffolding. The Lambda deploys with a placeholder artifact — a CI/CD pipeline (or `make deploy-lambda`) replaces it with the real application package. `MOCK_AUTH=true` is set for the demo; production JWT validation requires Cognito integration.
+
 ```bash
 cd solution/infra/terraform
 terraform init
 terraform plan -out=healthstream.plan
 terraform apply healthstream.plan
+
+# After infra is up, deploy the Lambda artifact:
+# cd solution/backend && make deploy-lambda
 ```
 
 5 modules: `networking` (VPC + PrivateLink), `compute` (Lambda + API Gateway), `storage` (S3 Vectors + DynamoDB), `security` (KMS + Cognito + IAM), `monitoring` (CloudTrail + CloudWatch).

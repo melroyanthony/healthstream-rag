@@ -3,11 +3,52 @@
 variable "environment" { type = string }
 variable "aws_region" { type = string }
 
+data "aws_caller_identity" "current" {}
+
 # KMS CMK for data encryption at rest
 resource "aws_kms_key" "healthstream" {
   description             = "HealthStream RAG data encryption key"
   deletion_window_in_days = 30
   enable_key_rotation     = true
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "RootAccountAccess"
+        Effect = "Allow"
+        Principal = { AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root" }
+        Action   = "kms:*"
+        Resource = "*"
+      },
+      {
+        Sid    = "CloudTrailEncrypt"
+        Effect = "Allow"
+        Principal = { Service = "cloudtrail.amazonaws.com" }
+        Action = [
+          "kms:GenerateDataKey*",
+          "kms:DescribeKey",
+        ]
+        Resource = "*"
+        Condition = {
+          StringEquals = { "aws:SourceAccount" = data.aws_caller_identity.current.account_id }
+        }
+      },
+      {
+        Sid    = "CloudWatchLogsEncrypt"
+        Effect = "Allow"
+        Principal = { Service = "logs.${var.aws_region}.amazonaws.com" }
+        Action = [
+          "kms:Encrypt*",
+          "kms:Decrypt*",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:Describe*",
+        ]
+        Resource = "*"
+      },
+    ]
+  })
 
   tags = { Name = "healthstream-${var.environment}-cmk" }
 }
