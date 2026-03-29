@@ -16,6 +16,7 @@ variable "lambda_execution_role_arn" { type = string }
 variable "lambda_execution_role_name" { type = string }
 variable "vector_backend" { type = string }
 variable "s3_vectors_bucket_name" { type = string }
+variable "ecr_image_uri" { type = string }
 
 # Lambda log group — explicit with KMS encryption and retention
 resource "aws_cloudwatch_log_group" "lambda_query" {
@@ -31,17 +32,14 @@ resource "aws_lambda_function" "query" {
   function_name = "healthstream-${var.environment}-query"
   role          = var.lambda_execution_role_arn
   kms_key_arn   = var.kms_key_arn
-  handler       = "app.api.lambda_handler.handler"
-  runtime       = "python3.13"
+  package_type  = "Image"
+  image_uri     = "${var.ecr_image_uri}:latest"
   memory_size   = var.lambda_memory_mb
   timeout       = var.lambda_timeout
   architectures = ["arm64"]
 
-  # Placeholder — CI/CD pipeline deploys the real artifact
-  filename = "${path.module}/placeholder.zip"
-
   lifecycle {
-    ignore_changes = [filename, source_code_hash]
+    ignore_changes = [image_uri]
   }
 
   vpc_config {

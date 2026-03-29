@@ -1,0 +1,19 @@
+# Production Lambda dependencies — NO local-dev packages
+# torch, sentence-transformers, chromadb, anthropic excluded
+# Production uses: Bedrock (LLM + embeddings), S3 Vectors, Comprehend Medical
+#
+# Total: ~30MB (vs 225MB with local-dev deps)
+
+fastapi>=0.115.0
+mangum>=0.19.0
+pydantic>=2.0
+pydantic-settings>=2.0
+httpx>=0.27.0
+boto3>=1.35.0
+tenacity>=9.0.0
+structlog>=24.0.0
+numpy>=1.26.0
+rank-bm25>=0.2.2
+pyyaml>=6.0
+uvicorn>=0.30.0
+python-dotenv>=1.0.0
