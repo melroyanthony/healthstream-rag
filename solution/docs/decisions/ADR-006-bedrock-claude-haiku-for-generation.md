@@ -40,7 +40,7 @@ Use Claude Haiku 4.5 on Amazon Bedrock for response generation.
 - Claude Sonnet 4 available for complex clinical reasoning (via Intelligent Prompt Routing)
 
 ## Consequences
-- Demo uses Anthropic direct API (local dev, mock mode)
+- Demo local dev uses Anthropic direct API when `ANTHROPIC_API_KEY` is set; falls back to mock generation otherwise
 - Production uses Bedrock with Claude Haiku 4.5
 - Model ID configurable via `BEDROCK_LLM_MODEL` environment variable
 - Upgrade path to newer models requires only config change
