@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.0](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.5.0) (2026-03-29)
+
+### Features
+
+* add idempotent AWS demo script with patient personas
+
 ## [1.4.0](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.4.0) (2026-03-29)
 
 ### Features
