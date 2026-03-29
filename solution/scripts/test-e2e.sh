@@ -25,7 +25,7 @@ check() {
     fi
 }
 
-CURL_OPTS="--connect-timeout 5 --max-time 30"
+CURL_OPTS=(--connect-timeout 5 --max-time 30)
 
 echo "=== HealthStream RAG E2E Happy Path ==="
 echo "Target: $BASE_URL"
@@ -33,12 +33,12 @@ echo ""
 
 # 1. Health check
 echo "1. Health Check"
-CODE=$(curl -s $CURL_OPTS -o /dev/null -w "%{http_code}" "$BASE_URL/health")
+CODE=$(curl -s "${CURL_OPTS[@]}" -o /dev/null -w "%{http_code}" "$BASE_URL/health")
 check "GET /health" "200" "$CODE"
 
 # 2. Ingest documents for patient
 echo "2. Ingest Documents"
-CODE=$(curl -s $CURL_OPTS -o /dev/null -w "%{http_code}" -X POST "$BASE_URL/api/v1/ingest" \
+CODE=$(curl -s "${CURL_OPTS[@]}" -o /dev/null -w "%{http_code}" -X POST "$BASE_URL/api/v1/ingest" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer patient-test-e2e" \
   -d '{
@@ -60,7 +60,7 @@ check "POST /api/v1/ingest" "200" "$CODE"
 
 # 3. Query health data
 echo "3. Query Health Data"
-RESPONSE=$(curl -s $CURL_OPTS -w "\n%{http_code}" -X POST "$BASE_URL/api/v1/query" \
+RESPONSE=$(curl -s "${CURL_OPTS[@]}" -w "\n%{http_code}" -X POST "$BASE_URL/api/v1/query" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer patient-test-e2e" \
   -d '{"question": "What was my sleep score?"}')
@@ -97,7 +97,7 @@ fi
 
 # 4. Create collection
 echo "4. Create Collection"
-CODE=$(curl -s $CURL_OPTS -o /dev/null -w "%{http_code}" -X POST "$BASE_URL/api/v1/collections" \
+CODE=$(curl -s "${CURL_OPTS[@]}" -o /dev/null -w "%{http_code}" -X POST "$BASE_URL/api/v1/collections" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer admin-e2e" \
   -d '{"name": "e2e-test", "dimension": 384}')
@@ -105,21 +105,21 @@ check "POST /api/v1/collections" "201" "$CODE"
 
 # 5. List collections
 echo "5. List Collections"
-CODE=$(curl -s $CURL_OPTS -o /dev/null -w "%{http_code}" \
+CODE=$(curl -s "${CURL_OPTS[@]}" -o /dev/null -w "%{http_code}" \
   -H "Authorization: Bearer admin-e2e" \
   "$BASE_URL/api/v1/collections")
 check "GET /api/v1/collections" "200" "$CODE"
 
 # 6. Delete collection
 echo "6. Delete Collection"
-CODE=$(curl -s $CURL_OPTS -o /dev/null -w "%{http_code}" -X DELETE \
+CODE=$(curl -s "${CURL_OPTS[@]}" -o /dev/null -w "%{http_code}" -X DELETE \
   -H "Authorization: Bearer admin-e2e" \
   "$BASE_URL/api/v1/collections/e2e-test")
 check "DELETE /api/v1/collections/e2e-test" "204" "$CODE"
 
 # 7. Verify deletion (should 404)
 echo "7. Verify Deletion"
-CODE=$(curl -s $CURL_OPTS -o /dev/null -w "%{http_code}" -X DELETE \
+CODE=$(curl -s "${CURL_OPTS[@]}" -o /dev/null -w "%{http_code}" -X DELETE \
   -H "Authorization: Bearer admin-e2e" \
   "$BASE_URL/api/v1/collections/e2e-test")
 check "DELETE /api/v1/collections/e2e-test (deleted)" "404" "$CODE"

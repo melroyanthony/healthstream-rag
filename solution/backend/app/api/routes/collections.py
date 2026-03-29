@@ -18,10 +18,7 @@ def list_collections(
     """List all vector collections."""
     names = vector_db.get_collections()
     collections = [
-        Collection(
-            name=name,
-            vector_count=vector_db.collection_count(name),
-        )
+        {"name": name, "vector_count": vector_db.collection_count(name)}
         for name in names
     ]
     return {"collections": collections}
