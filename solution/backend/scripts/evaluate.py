@@ -237,8 +237,9 @@ def run_golden_evaluations(
             json={"question": item.question},
         )
         if response.status_code != 200:
-            print(f"  [WARN] {item.id} query returned {response.status_code}")
-            continue
+            raise RuntimeError(
+                f"Query failed for {item.id} (HTTP {response.status_code}): {response.text}"
+            )
 
         data = response.json()
         answer: str = data.get("answer", "")
@@ -416,6 +417,11 @@ def main() -> None:
 
     print_results_table(results)
     print_summary(results, isolation_ok)
+
+    # Exit non-zero if any critical check failed
+    phi_count = sum(1 for r in results if r.phi_leaked)
+    if phi_count > 0 or not isolation_ok:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
