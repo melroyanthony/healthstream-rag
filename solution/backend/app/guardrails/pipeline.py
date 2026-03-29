@@ -80,7 +80,8 @@ def _check_grounding(response: str, context_chunks: list[str]) -> bool:
     if not context_chunks:
         return True
 
-    all_context = re.sub(r"[^\w\s]", "", " ".join(context_chunks).lower())
+    context_text = re.sub(r"[^\w\s]", "", " ".join(context_chunks).lower())
+    context_words = set(context_text.split())
     response_words = set(re.sub(r"[^\w\s]", "", response.lower()).split())
 
     stop_words = {"the", "a", "an", "is", "was", "are", "were", "and", "or", "in", "on", "at",
@@ -94,7 +95,7 @@ def _check_grounding(response: str, context_chunks: list[str]) -> bool:
     if not content_words:
         return True
 
-    grounded_count = sum(1 for word in content_words if word in all_context)
+    grounded_count = sum(1 for word in content_words if word in context_words)
     grounding_ratio = grounded_count / len(content_words) if content_words else 1.0
 
     return grounding_ratio >= settings.grounding_threshold

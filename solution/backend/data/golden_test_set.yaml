@@ -45,8 +45,8 @@
   expected_citations: ["CarePlan/plan-001"]
 
 - id: health-007
-  question: "What is my diagnosis?"
-  ground_truth: "You have been diagnosed with moderate Obstructive Sleep Apnea (ICD-10: G47.33), confirmed via polysomnography."
+  question: "What conditions are in my health records?"
+  ground_truth: "Your health records include a condition entry for Obstructive Sleep Apnea (ICD-10: G47.33). Please consult your care team for clinical interpretation."
   source_type: fhir
   patient_id: synthetic-patient-001
   expected_citations: ["Condition/cond-001"]

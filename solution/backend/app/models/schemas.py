@@ -75,7 +75,7 @@ class CreateCollectionRequest(BaseModel):
     """Create collection request."""
 
     name: str = Field(..., min_length=1, max_length=100, pattern=COLLECTION_NAME_PATTERN)
-    dimension: int = 384
+    dimension: int = Field(default=384, ge=1, le=4096)
 
 
 class DocumentInput(BaseModel):
