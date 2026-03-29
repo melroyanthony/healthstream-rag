@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.3.0](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.3.0) (2026-03-29)
+
+### Features
+
+* add RAGAS evaluation pipeline for golden test set (#20)
+
 ## [1.2.0](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.2.0) (2026-03-29)
 
 ### Features
