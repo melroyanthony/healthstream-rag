@@ -17,7 +17,9 @@ Use hybrid retrieval (vector semantic search + BM25 keyword search) rather than 
 2. Retrieve top-20 via BM25 on same patient's document corpus
 3. Normalize scores to 0..1 range (min-max per strategy)
 4. Merge + deduplicate by document ID, keeping highest score
-5. Rerank with Cohere Rerank (Bedrock) to produce final top-5
+5. Rerank merged results to produce final top-5:
+   - Demo: `SimpleReranker` (local query-term overlap scoring)
+   - Production target: Cohere Rerank via Bedrock
 
 ### BM25 Backend
 - **ChromaDB path**: `list_data_point_vectors()` fetches patient corpus from ChromaDB

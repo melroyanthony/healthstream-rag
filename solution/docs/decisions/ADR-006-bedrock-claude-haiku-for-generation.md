@@ -10,7 +10,7 @@ The RAG pipeline needs a generation model that balances cost, latency, and quali
 Use Claude Haiku 4.5 on Amazon Bedrock for response generation.
 
 ### Model Lifecycle (March 2026)
-| Model | Status | Pricing (MTok) |
+| Model | Status | Input / Output (per MTok) |
 |---|---|---|
 | Claude 3 Haiku | Retiring Apr 20, 2026 | $0.25 / $1.25 |
 | Claude 3.5 Haiku | Retired Feb 19, 2026 | N/A |

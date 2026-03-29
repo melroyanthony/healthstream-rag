@@ -7,7 +7,7 @@ Accepted
 At 10M daily users x 5 queries/day / 86,400 seconds = 578 QPS sustained, peaking at 1,500-2,000 QPS during morning/evening spikes. Bedrock on-demand has service quota limits that make synchronous routing at this scale unreliable.
 
 ## Decision
-At peak QPS (>500 sustained), route LLM calls through SQS buffer with async response via WebSocket API Gateway.
+When sustained QPS exceeds 500, route LLM calls through SQS buffer with async response via WebSocket API Gateway.
 
 ```
 Mobile App <-> WebSocket API Gateway (connection_id)
@@ -29,7 +29,7 @@ Mobile App <-> WebSocket API Gateway (connection_id)
 
 ## Trade-offs
 - Added complexity: WebSocket connection management, SQS DLQ for failures
-- Slight latency increase: SQS poll interval (~100ms) added to pipeline
+- Slight latency increase: SQS queueing and Lambda event source mapping latency (tunable via batch size, max batching window, long polling)
 - Not needed for demo: synchronous REST is sufficient at demo QPS
 
 ## Consequences
