@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.0](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.1.0) (2026-03-29)
+
+### Features
+
+* add Terraform IaC and update README with architecture index (#14)
+
 ## [1.0.2](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.0.2) (2026-03-29)
 
 ### Bug Fixes
