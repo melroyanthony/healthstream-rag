@@ -121,7 +121,7 @@ Check the Lambda is healthy:
 ```bash
 aws lambda invoke \
   --function-name healthstream-demo-query \
-  --payload '{"rawPath":"/health","requestContext":{"http":{"method":"GET"}},"headers":{}}' \
+  --payload '{"version":"2.0","rawPath":"/health","requestContext":{"http":{"method":"GET","path":"/health"}},"headers":{},"isBase64Encoded":false}' \
   --cli-binary-format raw-in-base64-out \
   response.json && cat response.json
 ```
