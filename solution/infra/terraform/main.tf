@@ -118,6 +118,12 @@ module "monitoring" {
   lambda_query_name = module.compute.lambda_query_function_name
 }
 
+module "edge" {
+  source       = "./modules/edge"
+  environment  = var.environment
+  api_endpoint = module.compute.api_endpoint
+}
+
 # --- Outputs ---
 
 output "api_endpoint" {

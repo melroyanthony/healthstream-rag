@@ -42,6 +42,11 @@ class DynamoMetadataStore:
                 logger.warning("DynamoDB not available: %s", e)
                 self._enabled = False
 
+    @property
+    def is_enabled(self) -> bool:
+        """Whether DynamoDB is active (only in production with s3vectors)."""
+        return self._enabled
+
     def record_ingestion(
         self,
         patient_id: str,
@@ -97,6 +102,21 @@ class DynamoMetadataStore:
         except Exception as e:
             logger.error("Failed to record session in DynamoDB: %s", type(e).__name__)
 
+    def get_patient_documents(self, patient_id: str) -> list[dict]:
+        """Get all ingested document metadata for a patient (BM25 corpus)."""
+        if not self._enabled:
+            return []
+        try:
+            from boto3.dynamodb.conditions import Key
+
+            response = self._docs_table.query(
+                KeyConditionExpression=Key("patient_id").eq(patient_id),
+            )
+            return response.get("Items", [])
+        except Exception as e:
+            logger.error("Failed to query patient documents: %s", type(e).__name__)
+            return []
+
     def get_recent_sessions(
         self, patient_id: str, limit: int = 5
     ) -> list[dict]:
@@ -104,10 +124,10 @@ class DynamoMetadataStore:
         if not self._enabled:
             return []
         try:
-            response = self._docs_table.query(
-                TableName=self._sessions_table.table_name,
-                KeyConditionExpression="patient_id = :pid",
-                ExpressionAttributeValues={":pid": patient_id},
+            from boto3.dynamodb.conditions import Key
+
+            response = self._sessions_table.query(
+                KeyConditionExpression=Key("patient_id").eq(patient_id),
                 ScanIndexForward=False,
                 Limit=limit,
             )

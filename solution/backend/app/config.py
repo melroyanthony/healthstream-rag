@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     aws_region: str = "eu-west-1"
     s3_vectors_bucket: str = "healthstream-vectors"
     s3_vectors_index: str = "healthstream"
-    bedrock_llm_model: str = "anthropic.claude-3-haiku-20240307-v1:0"
+    bedrock_llm_model: str = "eu.anthropic.claude-haiku-4-5-20251001-v1:0"
     bedrock_embedding_model: str = "amazon.titan-embed-text-v2:0"
     bedrock_embedding_dimension: int = 1024
 
