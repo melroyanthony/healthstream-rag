@@ -9,7 +9,7 @@ The entire demo stack costs roughly **$3 USD** and can be torn down in one comma
 
 | Tool | Min version | Install |
 |------|-------------|---------|
-| AWS CLI | 2.x | [docs.aws.amazon.com/cli](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) |
+| AWS CLI | 2.22+ | [docs.aws.amazon.com/cli](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) |
 | Terraform | 1.7+ | [developer.hashicorp.com/terraform](https://developer.hashicorp.com/terraform/install) |
 | uv | 0.6+ | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
 | Python | 3.13 | `uv python install 3.13` |
@@ -81,10 +81,10 @@ Save these values; you will need the `api_endpoint` later.
 
 ### 5. Package and deploy the Lambda
 
-From the `solution/` directory:
+Navigate back to `solution/` (from terraform dir):
 
 ```bash
-cd solution
+cd ../..   # back to solution/ from solution/infra/terraform/
 make deploy-lambda
 ```
 
@@ -105,7 +105,7 @@ make ingest-samples
 `make ingest-samples` targets the local ChromaDB store. For AWS ingestion, set the environment variables to point at S3 Vectors and Bedrock:
 
 ```bash
-cd solution/backend
+cd backend    # from solution/
 VECTOR_BACKEND=s3vectors \
 EMBEDDER_BACKEND=bedrock \
 S3_VECTORS_BUCKET=<bucket-from-step-4> \
