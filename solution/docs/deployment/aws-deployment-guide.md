@@ -151,11 +151,11 @@ Expected response:
 | DynamoDB (on-demand) | < 1 000 read/write units | ~$0.01 |
 | CloudWatch logs | < 1 GB ingested | ~$0.50 |
 | KMS key | 1 key, minimal API calls | ~$1.00 |
-| VPC NAT Gateway | 1 AZ, minimal data | ~$1.50 |
+| VPC interface endpoints | 4 endpoints (Bedrock, Comprehend, Logs, S3 Vectors) | ~$1.50 |
 | **Total** | | **~$3.05** |
 
-> NAT Gateway dominates the cost. For a zero-spend demo you can remove VPC config
-> from the Lambda and rely on public endpoints, but this requires a security review.
+> VPC interface endpoints dominate the cost (~$0.01/hour each). No NAT Gateway is
+> provisioned — all AWS service traffic uses PrivateLink (HIPAA data plane isolation).
 
 ---
 
