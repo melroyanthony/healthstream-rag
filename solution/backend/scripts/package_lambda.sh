@@ -38,7 +38,7 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "==> Installing production dependencies with uv..."
 
-uv export --no-dev --no-hashes --frozen -o "${BUILD_DIR}/requirements.txt" 2>/dev/null \
+cd "${BACKEND_DIR}" && uv export --no-dev --no-hashes --frozen -o "${BUILD_DIR}/requirements.txt" 2>/dev/null \
   || uv pip compile "${BACKEND_DIR}/pyproject.toml" --no-deps -o "${BUILD_DIR}/requirements.txt"
 uv pip install \
   --python python3.13 \

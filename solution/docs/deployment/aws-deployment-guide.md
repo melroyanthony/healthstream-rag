@@ -107,7 +107,7 @@ For the AWS environment, set the correct environment variables first:
 cd solution/backend
 VECTOR_BACKEND=s3vectors \
 S3_VECTORS_BUCKET=<bucket-from-step-4> \
-AWS_DEFAULT_REGION=eu-west-1 \
+AWS_REGION=eu-west-1 \
 MOCK_AUTH=true \
 uv run python scripts/ingest_samples.py
 ```
