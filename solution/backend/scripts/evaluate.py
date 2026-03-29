@@ -6,6 +6,7 @@ Runs golden test set through the RAG pipeline using a FastAPI test client
   - Faithfulness      : keyword overlap between generated answer and ground truth
   - Answer Relevancy  : fraction of question terms found in the generated answer
   - Context Precision : fraction of expected citation IDs retrieved
+  - Context Recall    : fraction of ground truth terms found in retrieved context
 
 Also checks:
   - PHI Leakage      : scans answers for SSN / phone / MRN patterns
@@ -91,6 +92,7 @@ class EvalResult:
     faithfulness: float
     answer_relevancy: float
     context_precision: float
+    context_recall: float
     phi_leaked: bool
     phi_patterns: list[str]
 
@@ -136,6 +138,17 @@ def context_precision_score(
     return round(found / len(expected_citations), 3)
 
 
+def context_recall_score(ground_truth: str, context_chunks: list[str]) -> float:
+    """Fraction of ground truth terms found in retrieved context."""
+    gt_tokens = _tokenize(ground_truth)
+    if not gt_tokens:
+        return 1.0
+    context_text = " ".join(context_chunks)
+    context_tokens = _tokenize(context_text)
+    found = len(gt_tokens & context_tokens)
+    return round(found / len(gt_tokens), 3)
+
+
 def check_phi_leakage(answer: str) -> tuple[bool, list[str]]:
     """Return (leaked, list_of_pattern_names_matched)."""
     matched: list[str] = []
@@ -166,7 +179,8 @@ def _build_test_client(chroma_dir: str):
 
     db = ChromaVectorDB(persist_directory=chroma_dir)
     embedder = LocalEmbedder()
-    generator = AnthropicGenerator(api_key="", model="claude-haiku-4-5-20250315")
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    generator = AnthropicGenerator(api_key=api_key, model="claude-haiku-4-5-20250315")
     controller = QueryController(vector_db=db, embedder=embedder, generator=generator)
 
     app = create_app()
@@ -238,6 +252,10 @@ def run_golden_evaluations(
                 context_precision=context_precision_score(
                     item.expected_citations, retrieved_ids
                 ),
+                context_recall=context_recall_score(
+                    item.ground_truth,
+                    [c.get("text_snippet", "") for c in data.get("citations", [])],
+                ),
                 phi_leaked=phi_leaked,
                 phi_patterns=phi_patterns,
             )
@@ -270,7 +288,7 @@ def _fmt(val: float) -> str:
 
 
 def _truncate(text: str, width: int) -> str:
-    return text if len(text) <= width else text[: width - 1] + "…"
+    return text if len(text) <= width else text[: width - 3] + "..."
 
 
 def print_results_table(results: list[EvalResult]) -> None:
@@ -281,6 +299,7 @@ def print_results_table(results: list[EvalResult]) -> None:
         f"{'Faithful':>{COL_FAITH}} "
         f"{'Relevancy':>{COL_REL}} "
         f"{'CtxPrec':>{COL_CTX}} "
+        f"{'CtxRec':>{COL_CTX}} "
         f"{'PHI':^{COL_PHI}}"
     )
     sep = "-" * TABLE_WIDTH
@@ -297,6 +316,7 @@ def print_results_table(results: list[EvalResult]) -> None:
             f"{_fmt(r.faithfulness):>{COL_FAITH}} "
             f"{_fmt(r.answer_relevancy):>{COL_REL}} "
             f"{_fmt(r.context_precision):>{COL_CTX}} "
+            f"{_fmt(r.context_recall):>{COL_CTX}} "
             f"{phi_flag:^{COL_PHI}}"
         )
 
@@ -312,6 +332,7 @@ def print_summary(results: list[EvalResult], isolation_ok: bool) -> None:
     avg_faith = sum(r.faithfulness for r in results) / len(results)
     avg_rel = sum(r.answer_relevancy for r in results) / len(results)
     avg_ctx = sum(r.context_precision for r in results) / len(results)
+    avg_recall = sum(r.context_recall for r in results) / len(results)
     phi_count = sum(1 for r in results if r.phi_leaked)
 
     print(f"\n{'SUMMARY':=^{TABLE_WIDTH}}")
@@ -319,6 +340,7 @@ def print_summary(results: list[EvalResult], isolation_ok: bool) -> None:
     print(f"  Avg Faithfulness    : {avg_faith:.3f}  (keyword overlap answer ↔ ground truth)")
     print(f"  Avg Answer Relevancy: {avg_rel:.3f}  (question terms found in answer)")
     print(f"  Avg Context Precision:{avg_ctx:.3f}  (expected citations retrieved)")
+    print(f"  Avg Context Recall  : {avg_recall:.3f}  (ground truth terms in context)")
     print(f"  PHI Leakage         : {phi_count} / {len(results)} answers flagged")
     print(f"  Patient Isolation   : {'PASS' if isolation_ok else 'FAIL'}")
     print("=" * TABLE_WIDTH)
