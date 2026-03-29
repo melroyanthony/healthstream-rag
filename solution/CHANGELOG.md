@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.1](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.5.1) (2026-03-29)
+
+### Miscellaneous
+
+* remove aws_demo.sh from tracking (contains Cognito IDs)
+
 ## [1.5.0](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.5.0) (2026-03-29)
 
 ### Features
