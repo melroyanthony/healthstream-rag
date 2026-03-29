@@ -1,0 +1,26 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - VECTOR_BACKEND=chroma
+      - LLM_BACKEND=anthropic
+      - EMBEDDER_BACKEND=local
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - MOCK_AUTH=true
+      - CHROMA_PERSIST_DIRECTORY=/data/chroma
+      - DEBUG=true
+    volumes:
+      - chroma_data:/data/chroma
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  chroma_data:
