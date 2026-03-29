@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.1](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.1.1) (2026-03-29)
+
+### Documentation
+
+* fix stale architecture docs to match Phase 1 implementation (#18)
+
 ## [1.1.0](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.1.0) (2026-03-29)
 
 ### Features
