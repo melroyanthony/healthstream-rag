@@ -76,12 +76,19 @@ class HybridRetriever:
 
         seen: dict[str, VectorSearchResult] = {}
 
+        def _dedup_key(r: VectorSearchResult) -> str:
+            """Use source_id for dedup (same doc from multiple ingest runs)."""
+            return r.metadata.get("source_id", r.id)
+
         for result in vector_results:
-            seen[result.id] = result
+            key = _dedup_key(result)
+            if key not in seen or result.score > seen[key].score:
+                seen[key] = result
 
         for result in bm25_results:
-            if result.id not in seen or result.score > seen[result.id].score:
-                seen[result.id] = result
+            key = _dedup_key(result)
+            if key not in seen or result.score > seen[key].score:
+                seen[key] = result
 
         merged = list(seen.values())
         merged.sort(key=lambda r: r.score, reverse=True)

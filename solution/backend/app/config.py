@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     bm25_enabled: bool = True
 
     # Guardrails
-    grounding_threshold: float = 0.4
+    grounding_threshold: float = 0.3
     medical_disclaimer: str = (
         "This information is from your health records. "
         "Always consult your care team."

@@ -86,15 +86,22 @@ class QueryController:
 
         answer, _passed = apply_guardrails(answer, context_chunks)
 
-        citations = [
-            Citation(
-                source_id=r.metadata.get("source_id", r.id),
-                source_type=r.metadata.get("source_type", "unknown"),
-                text_snippet=r.text[:200],
-                relevance_score=r.score,
+        # Deduplicate citations by source_id (BM25 + vector can return same doc)
+        seen_sources: set[str] = set()
+        citations: list[Citation] = []
+        for r in reranked:
+            sid = r.metadata.get("source_id", r.id)
+            if sid in seen_sources:
+                continue
+            seen_sources.add(sid)
+            citations.append(
+                Citation(
+                    source_id=sid,
+                    source_type=r.metadata.get("source_type", "unknown"),
+                    text_snippet=r.text[:200],
+                    relevance_score=r.score,
+                )
             )
-            for r in reranked
-        ]
 
         elapsed_ms = (time.time() - start) * 1000
         model = self._generator.model_name()

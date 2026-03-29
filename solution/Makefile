@@ -4,35 +4,37 @@
 # Run from: solution/ directory (where this Makefile lives)
 #
 # Usage:
-#   make dev            Start local dev server (port 8000)
-#   make test           Run the test suite with mock auth
-#   make lint           Lint app/ and tests/ with ruff
-#   make docker-up      Build and start Docker Compose stack
-#   make docker-down    Stop Docker Compose stack
-#   make deploy-lambda  Package and upload Lambda to AWS
-#   make ingest-samples Ingest sample data into the vector store
-#   make eval           Run the RAG evaluation script
+#   make dev             Start local dev server (port 8000)
+#   make test            Run the test suite with mock auth
+#   make lint            Lint app/ and tests/ with ruff
+#   make docker-up       Build and start Docker Compose stack
+#   make docker-down     Stop Docker Compose stack
+#   make deploy          Build + push + update Lambda (one command)
+#   make ecr-cleanup     Remove old ECR image tags
+#   make ingest-samples  Ingest sample data into the vector store
+#   make eval            Run the RAG evaluation script
+#   make demo            Run the full AWS demo script
 
 BACKEND_DIR := backend
 INFRA_DIR   := infra/terraform
 AWS_REGION  := eu-west-1
+AWS_ACCOUNT := $(shell aws sts get-caller-identity --query Account --output text 2>/dev/null)
+ECR_REPO    := $(AWS_ACCOUNT).dkr.ecr.$(AWS_REGION).amazonaws.com/healthstream-rag
 LAMBDA_FUNC := healthstream-demo-query
+VERSION     := $(shell date +%Y%m%d-%H%M%S)
 
-.PHONY: dev test lint docker-up docker-down deploy-lambda ingest-samples eval
+.PHONY: dev test lint docker-up docker-down deploy ecr-login ecr-cleanup ingest-samples eval demo terraform-apply
 
 # ---------------------------------------------------------------------------
 # Local development
 # ---------------------------------------------------------------------------
 
-## Start the FastAPI dev server with live reload on port 8000
 dev:
 	cd $(BACKEND_DIR) && uv run uvicorn app.api.main:app --reload --port 8000
 
-## Run pytest with mock authentication enabled
 test:
 	cd $(BACKEND_DIR) && MOCK_AUTH=true uv run pytest tests/ -v
 
-## Check code style and imports with ruff (no auto-fix)
 lint:
 	cd $(BACKEND_DIR) && uv run ruff check app/ tests/
 
@@ -40,30 +42,70 @@ lint:
 # Docker
 # ---------------------------------------------------------------------------
 
-## Build images and start all services in detached mode
 docker-up:
 	docker compose up --build -d
 
-## Stop and remove all Docker Compose containers
 docker-down:
 	docker compose down
 
 # ---------------------------------------------------------------------------
-# AWS deployment
+# AWS Lambda deployment (one command: build → push → deploy)
 # ---------------------------------------------------------------------------
 
-## Package the Lambda zip then upload it to the deployed function
-deploy-lambda:
-	cd $(BACKEND_DIR) && bash scripts/package_lambda.sh
+ecr-login:
+	@aws ecr get-login-password --region $(AWS_REGION) | \
+		docker login --username AWS --password-stdin $(ECR_REPO) 2>/dev/null
+
+## Full deploy: build container → push to ECR → update Lambda
+deploy: ecr-login
+	@echo "==> Building Lambda container ($(VERSION))..."
+	docker build --platform linux/arm64 --provenance=false --no-cache \
+		-f $(BACKEND_DIR)/Dockerfile.lambda \
+		-t healthstream-rag-lambda:$(VERSION) \
+		$(BACKEND_DIR)
+	@echo "==> Pushing to ECR..."
+	docker tag healthstream-rag-lambda:$(VERSION) $(ECR_REPO):$(VERSION)
+	docker tag healthstream-rag-lambda:$(VERSION) $(ECR_REPO):latest
+	docker push $(ECR_REPO):$(VERSION)
+	docker push $(ECR_REPO):latest
+	@echo "==> Updating Lambda function..."
 	aws lambda update-function-code \
 		--function-name $(LAMBDA_FUNC) \
-		--zip-file fileb://$(BACKEND_DIR)/lambda-package.zip \
-		--region $(AWS_REGION)
+		--image-uri $(ECR_REPO):$(VERSION) \
+		--region $(AWS_REGION) --no-cli-pager | grep -E "CodeSha256|State"
+	@echo "==> Waiting for Lambda to be ready..."
+	aws lambda wait function-updated --function-name $(LAMBDA_FUNC) --region $(AWS_REGION)
+	@echo "==> Deploy complete: $(VERSION)"
 
-## Ingest sample health documents into the vector store (mock auth)
+## Remove old ECR images (keep latest 3)
+ecr-cleanup:
+	@echo "==> Cleaning old ECR images (keeping latest 3)..."
+	@aws ecr describe-images --repository-name healthstream-rag --region $(AWS_REGION) \
+		--query 'sort_by(imageDetails,& imagePushedAt)[:-3].[imageDigest]' --output text 2>/dev/null | \
+		while read digest; do \
+			if [ -n "$$digest" ]; then \
+				aws ecr batch-delete-image --repository-name healthstream-rag \
+					--image-ids imageDigest=$$digest --region $(AWS_REGION) --no-cli-pager > /dev/null 2>&1; \
+				echo "  Deleted: $$digest"; \
+			fi; \
+		done
+	@echo "==> ECR cleanup done"
+
+## Apply Terraform infrastructure changes
+terraform-apply:
+	cd $(INFRA_DIR) && terraform init -input=false && \
+		terraform plan -var="ecr_image_uri=$(ECR_REPO)" -out=healthstream.plan && \
+		terraform apply healthstream.plan
+
+# ---------------------------------------------------------------------------
+# Data & evaluation
+# ---------------------------------------------------------------------------
+
 ingest-samples:
 	cd $(BACKEND_DIR) && MOCK_AUTH=true uv run python scripts/ingest_samples.py
 
-## Run the offline RAG evaluation script (mock auth)
 eval:
 	cd $(BACKEND_DIR) && MOCK_AUTH=true uv run python scripts/evaluate.py
+
+demo:
+	cd $(BACKEND_DIR) && bash scripts/aws_demo.sh
