@@ -90,3 +90,4 @@ solution/infra/terraform/.terraform/
 solution/infra/terraform/*.tfstate*
 solution/infra/terraform/*.plan
 solution/infra/terraform/.terraform.lock.hcl
+solution/backend/scripts/aws_demo.sh
