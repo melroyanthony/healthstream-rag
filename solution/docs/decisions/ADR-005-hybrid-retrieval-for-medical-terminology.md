@@ -37,6 +37,6 @@ Use hybrid retrieval (vector semantic search + BM25 keyword search) rather than 
 - Additional latency (~20ms) for BM25 scoring
 
 ## Consequences
-- BM25 enabled by default for ChromaDB/OpenSearch backends
+- BM25 enabled by default for ChromaDB backend (and for OpenSearch once implemented)
 - Auto-disabled for S3 Vectors backend (until DynamoDB corpus store is wired)
-- Retrieval quality validated via RAGAS context_precision and context_recall metrics
+- Retrieval quality to be validated via RAGAS context_precision and context_recall metrics once evaluation pipeline is integrated
