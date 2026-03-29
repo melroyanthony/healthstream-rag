@@ -23,7 +23,7 @@ Use hybrid retrieval (vector semantic search + BM25 keyword search) rather than 
 
 ### BM25 Backend
 - **ChromaDB path**: `list_data_point_vectors()` fetches patient corpus from ChromaDB
-- **S3 Vectors path**: BM25 auto-disabled (S3 Vectors cannot enumerate). Production uses DynamoDB as BM25 corpus store
+- **S3 Vectors path**: BM25 auto-disabled because S3 Vectors does not natively support deterministic scan/list. A demo-only `list_data_point_vectors()` exists using random-vector queries, but is non-deterministic and unsuitable as a corpus store. Production uses DynamoDB for BM25 documents
 - **OpenSearch path**: BM25 is native to OpenSearch (built-in)
 
 ## Rationale

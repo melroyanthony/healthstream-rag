@@ -16,7 +16,7 @@ Mobile App <-> WebSocket API Gateway (connection_id)
                      |
            Lambda (query orchestrator)
                      |
-           Bedrock Claude Haiku 4.5 (async)
+           Bedrock Claude Haiku 4.5 (sync call within async flow)
                      |
       API Gateway Management API -> push response to connection_id
 ```
