@@ -40,7 +40,7 @@ variable "environment" {
 }
 
 variable "vector_backend" {
-  description = "Vector store backend: s3vectors or opensearch"
+  description = "Vector store backend: s3vectors (opensearch planned, not yet implemented)"
   type        = string
   default     = "s3vectors"
 

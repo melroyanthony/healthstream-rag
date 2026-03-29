@@ -27,8 +27,12 @@ resource "aws_lambda_function" "query" {
   timeout       = var.lambda_timeout
   architectures = ["arm64"]
 
-  # Placeholder — actual deployment uses CI/CD pipeline
+  # Placeholder — CI/CD pipeline deploys the real artifact
   filename = "${path.module}/placeholder.zip"
+
+  lifecycle {
+    ignore_changes = [filename, source_code_hash]
+  }
 
   vpc_config {
     subnet_ids         = var.private_subnet_ids
