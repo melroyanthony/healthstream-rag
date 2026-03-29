@@ -1,19 +1,19 @@
-# CloudFront + WAF — edge layer for DDoS protection and rate limiting
+# WAF Web ACL — rate limiting and basic protection
+# Note: HTTP API Gateway (v2) does not support WAF association directly.
+# WAF is deployed as a standalone ACL ready for CloudFront or REST API Gateway.
 
 variable "environment" { type = string }
 variable "api_endpoint" { type = string }
 
-# WAF Web ACL with patient_id rate limiting
 resource "aws_wafv2_web_acl" "main" {
   name        = "healthstream-${var.environment}-waf"
   scope       = "REGIONAL"
-  description = "Rate limiting and basic protection for HealthStream RAG API"
+  description = "Rate limiting and protection for HealthStream RAG API"
 
   default_action {
     allow {}
   }
 
-  # Rate limit: 100 requests per 5 minutes per IP
   rule {
     name     = "rate-limit-per-ip"
     priority = 1
@@ -36,7 +36,6 @@ resource "aws_wafv2_web_acl" "main" {
     }
   }
 
-  # Block common attack patterns
   rule {
     name     = "aws-managed-common"
     priority = 2
@@ -68,10 +67,8 @@ resource "aws_wafv2_web_acl" "main" {
   tags = { Name = "healthstream-${var.environment}-waf" }
 }
 
-# Associate WAF with API Gateway
-resource "aws_wafv2_web_acl_association" "api_gateway" {
-  resource_arn = "arn:aws:apigateway:eu-west-1::/restapis/${split("//", split(".", var.api_endpoint)[0])[1]}"
-  web_acl_arn  = aws_wafv2_web_acl.main.arn
-}
+# WAF association with API Gateway would go here when migrating to REST API (v1)
+# or fronting with CloudFront. HTTP API v2 does not support direct WAF association.
+# For production: CloudFront -> WAF -> API Gateway HTTP API
 
 output "waf_acl_arn" { value = aws_wafv2_web_acl.main.arn }
