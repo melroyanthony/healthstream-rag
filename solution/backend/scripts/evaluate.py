@@ -65,7 +65,7 @@ COL_FAITH = 11
 COL_REL = 11
 COL_CTX = 11
 COL_PHI = 8
-TABLE_WIDTH = COL_ID + COL_Q + COL_FAITH + COL_REL + COL_CTX + COL_PHI + 7
+TABLE_WIDTH = COL_ID + COL_Q + COL_FAITH + COL_REL + COL_CTX * 2 + COL_PHI + 8
 
 
 # ---------------------------------------------------------------------------
@@ -339,7 +339,7 @@ def print_summary(results: list[EvalResult], isolation_ok: bool) -> None:
     print(f"  Total test cases    : {len(results)}")
     print(f"  Avg Faithfulness    : {avg_faith:.3f}  (keyword overlap answer ↔ ground truth)")
     print(f"  Avg Answer Relevancy: {avg_rel:.3f}  (question terms found in answer)")
-    print(f"  Avg Context Precision:{avg_ctx:.3f}  (expected citations retrieved)")
+    print(f"  Avg Context Precision: {avg_ctx:.3f}  (expected citations retrieved)")
     print(f"  Avg Context Recall  : {avg_recall:.3f}  (ground truth terms in context)")
     print(f"  PHI Leakage         : {phi_count} / {len(results)} answers flagged")
     print(f"  Patient Isolation   : {'PASS' if isolation_ok else 'FAIL'}")
