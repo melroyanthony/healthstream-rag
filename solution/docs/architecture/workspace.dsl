@@ -25,13 +25,13 @@ workspace "HealthStream RAG" "HIPAA-compliant RAG chatbot for personal health da
                 reranker = component "SimpleReranker" "Query-document relevance scoring (Phase 2: Cohere Rerank)" "Python"
                 generator = component "LLMGenerator" "Claude Haiku 4.5 generation" "Bedrock (prod) / Anthropic (dev)"
                 guardrails = component "GuardrailsPipeline" "PHI check, denied topics, grounding, disclaimer" "Python"
-                patientIsolation = component "PatientIsolationMiddleware" "Mandatory patient_id filter from JWT" "Python"
+                patientIsolation = component "get_patient_id" "FastAPI Depends() — extracts patient_id from JWT Bearer token" "Python"
             }
 
             # Application Layer — Ingestion (Phase 1: Generic endpoint)
             ingestionPipeline = container "Ingestion Pipeline" "Parse, redact PHI, embed, store" "FastAPI /api/v1/ingest" "Application" {
                 ingestEndpoint = component "IngestEndpoint" "Generic document ingestion API" "FastAPI"
-                phiRedactor = component "PHIRedactionParser" "Regex (dev) / Comprehend Medical (prod)" "Python / AWS Comprehend"
+                phiRedactor = component "redact_phi()" "Regex patterns (dev) / Comprehend Medical (prod)" "Python / AWS Comprehend"
                 embedder = component "Embedder" "sentence-transformers (dev) / Titan V2 (prod)" "Python / Bedrock"
                 # Phase 2 components (not yet implemented):
                 # healthkitLoader = component "HealthKitLoader" "Real-time health events" "Kinesis + Lambda"
@@ -63,7 +63,7 @@ workspace "HealthStream RAG" "HIPAA-compliant RAG chatbot for personal health da
         apiGateway -> queryOrchestrator "Invoke with patient_id" "Lambda"
 
         queryOrchestrator -> vectorStore "query_vectors(embedding, patient_id, k=20)" "boto3 / chromadb"
-        queryOrchestrator -> dynamoDB "Get patient context" "boto3"
+        # Phase 2: queryOrchestrator -> dynamoDB "Get patient context + BM25 corpus" "boto3"
 
         ingestionPipeline -> vectorStore "upsert_documents(chunks, embeddings, metadata)" "boto3 / chromadb"
         ingestionPipeline -> s3Storage "Store raw encrypted records" "boto3"

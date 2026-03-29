@@ -12,7 +12,7 @@ C4Component
 
     Container_Boundary(ingest, "Ingestion Pipeline (FastAPI + Lambda)") {
         Component(ingest_api, "POST /api/v1/ingest", "FastAPI", "Accepts documents with text, source_type, source_id")
-        Component(phi_redactor, "PHIRedactionParser", "Regex (dev) / Comprehend Medical (prod)", "MANDATORY: Names, DOBs, MRNs, SSNs -> [REDACTED_*]")
+        Component(phi_redactor, "redact_phi()", "Regex patterns (dev) / Comprehend Medical (prod)", "Redacts common PHI patterns: SSN, phone, MRN, DOB, prefixed names")
         Component(embedder, "Embedder", "sentence-transformers (dev) / Titan V2 (prod)", "384-dim (dev) or 1024-dim (prod) embeddings")
     }
 
@@ -22,7 +22,7 @@ C4Component
     Rel(client, ingest_api, "POST documents with Bearer token", "HTTPS")
     Rel(ingest_api, phi_redactor, "Raw text -> redacted text")
     Rel(phi_redactor, embedder, "PHI-free text")
-    Rel(embedder, vector_store, "Embeddings + metadata (patient_id from JWT)")
+    Rel(embedder, vector_store, "Embeddings + metadata (patient_id from Bearer token)")
 ```
 
 ## Phase 2 (Target Architecture)

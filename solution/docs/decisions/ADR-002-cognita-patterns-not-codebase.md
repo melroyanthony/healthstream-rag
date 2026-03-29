@@ -13,7 +13,7 @@ Adopt Cognita's architectural philosophy and interface contracts. Build AWS-nati
 
 ## What We Adopted (Phase 1 — Implemented)
 
-1. **BaseVectorDB interface**: Adopted 6 of Cognita's 8 abstract methods — `create_collection`, `delete_collection`, `get_collections`, `upsert_documents`, `list_data_point_vectors`, `delete_data_point_vectors`. Added `query` with mandatory `patient_id` and `collection_count`. Cognita's `create_collection` takes `Embeddings` object; ours takes `dimension: int` (no LangChain coupling).
+1. **BaseVectorDB interface**: Adopted 6 of Cognita's 8 abstract methods — `create_collection`, `delete_collection`, `get_collections`, `upsert_documents`, `list_data_point_vectors`, `delete_data_point_vectors`. Added 3 new: `query` (with mandatory `patient_id`), `delete_documents`, `collection_count` — totalling 9 abstract methods. Cognita's `create_collection` takes LangChain `Embeddings`; ours takes `dimension: int` (no coupling).
 2. **BaseEmbedder interface**: Cognita uses LangChain `Embeddings` base class. We created our own with `embed(texts)`, `embed_query(text)`, `dimension()` — same semantics, no LangChain dependency.
 3. **BaseReranker interface**: Not directly from Cognita (which uses LangChain retriever patterns). Our own `rerank(query, results, top_k)` contract.
 4. **BaseGenerator interface**: Our own `generate(system_prompt, user_message, context_chunks)` contract. Cognita uses LangChain LLM chains.
@@ -38,8 +38,8 @@ Adopt Cognita's architectural philosophy and interface contracts. Build AWS-nati
 
 ## What We Add (Not in Cognita)
 
-1. **PatientIsolationMiddleware** — mandatory `patient_id` injection from JWT on every retrieval. Cognita has zero multi-tenancy or data isolation.
-2. **PHIRedactionParser** — Comprehend Medical entity detection before embedding. Cognita has no PII/PHI handling.
+1. **`get_patient_id()` dependency** (FastAPI `Depends()`) — mandatory `patient_id` extraction from Bearer token on every retrieval. Cognita has zero multi-tenancy or data isolation.
+2. **`redact_phi()` function** — regex patterns (dev) / Comprehend Medical (prod) entity detection before embedding. Cognita has no PII/PHI handling.
 3. **Guardrails pipeline** — PHI response check, denied topics, grounding, medical disclaimer. Cognita has no guardrails.
 4. **Hybrid retrieval** — vector + BM25 with score normalization (Cognita only supports vector search)
 5. **Fail-fast on misconfiguration** — Bedrock backends raise RuntimeError instead of silent fallback

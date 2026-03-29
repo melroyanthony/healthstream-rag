@@ -83,7 +83,7 @@ healthstream_rag/
 │   └── lambda_handler.py   # Mangum adapter
 │
 ├── core/                   # Base interfaces (Cognita-inspired)
-│   ├── base_vector_db.py   # 8 abstract methods (6 from Cognita + 2 added)
+│   ├── base_vector_db.py   # 9 abstract methods (6 from Cognita + 3 added: query, delete_documents, collection_count)
 │   ├── base_embedder.py    # BaseEmbedder interface
 │   ├── base_reranker.py    # BaseReranker interface
 │   └── base_generator.py   # BaseGenerator interface
