@@ -80,8 +80,8 @@ def _check_grounding(response: str, context_chunks: list[str]) -> bool:
     if not context_chunks:
         return True
 
-    all_context = " ".join(context_chunks).lower()
-    response_words = set(response.lower().split())
+    all_context = re.sub(r"[^\w\s]", "", " ".join(context_chunks).lower())
+    response_words = set(re.sub(r"[^\w\s]", "", response.lower()).split())
 
     stop_words = {"the", "a", "an", "is", "was", "are", "were", "and", "or", "in", "on", "at",
                   "to", "for", "of", "with", "by", "from", "your", "you", "i", "my", "this",
