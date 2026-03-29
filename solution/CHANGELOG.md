@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.1](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.0.1) (2026-03-29)
+
+### CI/CD
+
+* move .github to repo root for GitHub Actions discovery
+
 All notable changes to the HealthStream RAG project.
 
 ## [1.0.0] - 2026-03-28
