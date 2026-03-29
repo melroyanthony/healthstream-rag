@@ -1,0 +1,125 @@
+{
+  "info": {
+    "name": "HealthStream RAG",
+    "description": "HIPAA-compliant RAG chatbot API for personal health data.\n\nSet `base_url` to `http://localhost:8000` (local) or your API Gateway URL (AWS).\nSet `patient_token` to a patient ID (e.g., `synthetic-patient-001`).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "base_url", "value": "http://localhost:8000"},
+    {"key": "patient_token", "value": "synthetic-patient-001"}
+  ],
+  "item": [
+    {
+      "name": "1. Health Check",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/health",
+        "description": "Verify the API is healthy and check which backends are active."
+      }
+    },
+    {
+      "name": "2. Ingest Documents",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/v1/ingest",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{patient_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"documents\": [\n    {\n      \"text\": \"Sleep session 2026-03-22: myAir score 88 out of 100. Therapy hours 7.5. AHI 2.8 events per hour. Mask seal: Good. Device: AirSense 11 AutoSet.\",\n      \"source_type\": \"healthkit\",\n      \"source_id\": \"myair-2026-03-22\"\n    },\n    {\n      \"text\": \"Sleep session 2026-03-23: myAir score 92 out of 100. Therapy hours 8.1. AHI 1.9 events per hour. Mask seal: Excellent.\",\n      \"source_type\": \"healthkit\",\n      \"source_id\": \"myair-2026-03-23\"\n    },\n    {\n      \"text\": \"FHIR Condition: Obstructive Sleep Apnea, ICD-10 G47.33. Status: active. AHI at diagnosis: 18 events per hour.\",\n      \"source_type\": \"fhir\",\n      \"source_id\": \"Condition/cond-001\"\n    },\n    {\n      \"text\": \"FHIR MedicationRequest: CPAP therapy. Device: ResMed AirSense 11. Pressure: 6-14 cmH2O.\",\n      \"source_type\": \"fhir\",\n      \"source_id\": \"MedicationRequest/med-001\"\n    }\n  ]\n}"
+        },
+        "description": "Ingest health documents. PHI is redacted before embedding. Patient ID comes from the Bearer token."
+      }
+    },
+    {
+      "name": "3. Query - Sleep Score",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/v1/query",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{patient_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"What was my sleep score this week?\"\n}"
+        },
+        "description": "Query health data. Returns answer with citations and medical disclaimer."
+      }
+    },
+    {
+      "name": "4. Query - Device Info",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/v1/query",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{patient_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"What CPAP device am I using?\"\n}"
+        }
+      }
+    },
+    {
+      "name": "5. Query - Diagnosis",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/v1/query",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{patient_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"What conditions are in my health records?\"\n}"
+        }
+      }
+    },
+    {
+      "name": "6. PATIENT ISOLATION TEST (wrong patient)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/v1/query",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer WRONG-PATIENT-ID"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"What was my sleep score?\"\n}"
+        },
+        "description": "HIPAA test: wrong patient should get 0 citations. Cross-patient data leakage is architecturally impossible."
+      }
+    },
+    {
+      "name": "7. List Collections",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/v1/collections",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{patient_token}}"}
+        ]
+      }
+    },
+    {
+      "name": "8. Query - Custom",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/v1/query",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{patient_token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"YOUR QUESTION HERE\"\n}"
+        },
+        "description": "Replace the question with your own query."
+      }
+    }
+  ]
+}
