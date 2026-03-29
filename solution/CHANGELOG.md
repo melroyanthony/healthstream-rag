@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.2](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.5.2) (2026-03-29)
+
+### Miscellaneous
+
+* gitignore .env.aws (AWS credentials)
+
 ## [1.5.1](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.5.1) (2026-03-29)
 
 ### Miscellaneous
