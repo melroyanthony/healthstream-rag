@@ -45,8 +45,8 @@ variable "vector_backend" {
   default     = "s3vectors"
 
   validation {
-    condition     = contains(["s3vectors", "opensearch"], var.vector_backend)
-    error_message = "vector_backend must be s3vectors or opensearch"
+    condition     = contains(["s3vectors"], var.vector_backend)
+    error_message = "vector_backend must be s3vectors (opensearch planned, not yet implemented)"
   }
 }
 
@@ -89,7 +89,6 @@ module "compute" {
   aws_region                = var.aws_region
   lambda_memory_mb          = var.lambda_memory_mb
   lambda_timeout            = var.lambda_timeout
-  vpc_id                    = module.networking.vpc_id
   private_subnet_ids        = module.networking.private_subnet_ids
   security_group_id         = module.networking.lambda_security_group_id
   dynamodb_table_arn        = module.storage.dynamodb_table_arn
@@ -98,6 +97,8 @@ module "compute" {
   cognito_user_pool_arn     = module.security.cognito_user_pool_arn
   cognito_client_id         = module.security.cognito_client_id
   lambda_execution_role_arn = module.security.lambda_execution_role_arn
+  vector_backend            = var.vector_backend
+  s3_vectors_bucket_name    = module.storage.s3_vectors_bucket_name
 }
 
 module "monitoring" {

@@ -5,10 +5,13 @@ variable "lambda_query_name" { type = string }
 variable "aws_region" { type = string }
 variable "kms_key_arn" { type = string }
 
+data "aws_caller_identity" "current" {}
+
 # CloudTrail — HIPAA audit trail for all API calls
 resource "aws_cloudtrail" "audit" {
   name                       = "healthstream-${var.environment}-audit"
   s3_bucket_name             = aws_s3_bucket.audit_logs.id
+  depends_on                 = [aws_s3_bucket_policy.audit_logs]
   include_global_service_events = true
   is_multi_region_trail      = false
   enable_log_file_validation = true
@@ -22,7 +25,7 @@ resource "aws_cloudtrail" "audit" {
 }
 
 resource "aws_s3_bucket" "audit_logs" {
-  bucket = "healthstream-${var.environment}-audit-logs"
+  bucket = "healthstream-${var.environment}-audit-${data.aws_caller_identity.current.account_id}"
   tags   = { Name = "healthstream-audit-logs" }
 }
 

@@ -4,7 +4,6 @@ variable "environment" { type = string }
 variable "aws_region" { type = string }
 variable "lambda_memory_mb" { type = number }
 variable "lambda_timeout" { type = number }
-variable "vpc_id" { type = string }
 variable "private_subnet_ids" { type = list(string) }
 variable "security_group_id" { type = string }
 variable "dynamodb_table_arn" { type = string }
@@ -13,6 +12,8 @@ variable "kms_key_arn" { type = string }
 variable "cognito_user_pool_arn" { type = string }
 variable "cognito_client_id" { type = string }
 variable "lambda_execution_role_arn" { type = string }
+variable "vector_backend" { type = string }
+variable "s3_vectors_bucket_name" { type = string }
 
 # Lambda — Query Orchestrator
 resource "aws_lambda_function" "query" {
@@ -35,11 +36,12 @@ resource "aws_lambda_function" "query" {
 
   environment {
     variables = {
-      VECTOR_BACKEND    = "s3vectors"
+      VECTOR_BACKEND    = var.vector_backend
       LLM_BACKEND       = "bedrock"
       EMBEDDER_BACKEND  = "bedrock"
-      MOCK_AUTH         = "false"
+      MOCK_AUTH         = "true"
       AWS_REGION        = var.aws_region
+      S3_VECTORS_BUCKET = var.s3_vectors_bucket_name
     }
   }
 

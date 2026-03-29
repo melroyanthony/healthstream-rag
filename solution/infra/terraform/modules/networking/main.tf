@@ -29,6 +29,14 @@ resource "aws_security_group" "lambda" {
   name_prefix = "healthstream-lambda-"
   vpc_id      = aws_vpc.main.id
 
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    self        = true
+    description = "HTTPS from Lambda to VPC interface endpoints"
+  }
+
   egress {
     from_port       = 443
     to_port         = 443
