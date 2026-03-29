@@ -5,11 +5,14 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 
+COLLECTION_NAME_PATTERN = r"^[a-z][a-z0-9_-]*$"
+
+
 class QueryRequest(BaseModel):
     """RAG query request."""
 
     question: str = Field(..., min_length=1, max_length=2000)
-    collection_name: str = "default"
+    collection_name: str = Field(default="default", pattern=COLLECTION_NAME_PATTERN, max_length=100)
     top_k: int = Field(
         default=5, ge=1, le=20,
         description="Number of results after reranking (not retrieval size)",
@@ -71,7 +74,7 @@ class Collection(BaseModel):
 class CreateCollectionRequest(BaseModel):
     """Create collection request."""
 
-    name: str = Field(..., min_length=1, max_length=100, pattern=r"^[a-z][a-z0-9_-]*$")
+    name: str = Field(..., min_length=1, max_length=100, pattern=COLLECTION_NAME_PATTERN)
     dimension: int = 384
 
 
@@ -88,7 +91,7 @@ class IngestRequest(BaseModel):
     """Document ingestion request."""
 
     documents: list[DocumentInput] = Field(..., min_length=1, max_length=100)
-    collection_name: str = "default"
+    collection_name: str = Field(default="default", pattern=COLLECTION_NAME_PATTERN, max_length=100)
 
 
 class IngestResponse(BaseModel):

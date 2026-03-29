@@ -67,6 +67,7 @@ uv run uvicorn app.api.main:app --reload --port 8000
 curl http://localhost:8000/health
 curl -X POST http://localhost:8000/api/v1/query \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer synthetic-patient-001" \
   -d '{"question": "What was my average sleep score last week?"}'
 ```
 
