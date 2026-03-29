@@ -202,7 +202,7 @@ All configuration via environment variables (see `backend/.env.example`):
 | L1 | [System Context](docs/architecture/c4/c4-context.md) | Patients, clinicians, external data sources |
 | L2 | [Container](docs/architecture/c4/c4-container.md) | API Gateway, Query Orchestrator, Ingestion, data stores |
 | L3 | [Component — Query](docs/architecture/c4/c4-component-query.md) | RAG pipeline: hybrid retrieval, reranking, guardrails |
-| L3 | [Component — Ingestion](docs/architecture/c4/c4-component-ingestion.md) | 3 loaders, PHI redaction, embedding |
+| L3 | [Component — Ingestion](docs/architecture/c4/c4-component-ingestion.md) | Ingestion pipeline: PHI redaction, embedding (Phase 2: dedicated loaders) |
 | - | [Deployment](docs/architecture/c4/c4-deployment.md) | AWS eu-west-1 topology, VPC, PrivateLink |
 | - | [HIPAA Controls](docs/architecture/c4/hipaa-controls.md) | 4-layer defense model, control mapping |
 
@@ -227,7 +227,7 @@ All configuration via environment variables (see `backend/.env.example`):
 
 1. **S3 Vectors over OpenSearch**: Pay-per-query ($0 idle) vs $345/month floor. ~100ms latency acceptable since LLM generation dominates pipeline time.
 
-2. **Cognita patterns, not codebase**: Adopted interface contracts (BaseVectorDB, BaseParser) and registry pattern. Built AWS-native implementations. Added patient isolation and PHI redaction not present in Cognita.
+2. **Cognita patterns, not codebase**: Adopted interface contracts (BaseVectorDB, BaseEmbedder, BaseReranker, BaseGenerator). BaseParser and BaseDataLoader planned for Phase 2. Added patient isolation and PHI redaction not present in Cognita.
 
 3. **DynamoDB over Aurora**: Zero idle cost, Lambda-native (no connection pooling), free tier covers demo.
 
@@ -248,6 +248,20 @@ terraform apply healthstream.plan
 ```
 
 5 modules: `networking` (VPC + PrivateLink), `compute` (Lambda + API Gateway), `storage` (S3 Vectors + DynamoDB), `security` (KMS + Cognito + IAM), `monitoring` (CloudTrail + CloudWatch).
+
+## Feature Parity: Local Dev vs Production
+
+| Feature | Local Dev | Production (AWS) | Status |
+|---|---|---|---|
+| Vector Store | ChromaDB (in-process) | S3 Vectors (eu-west-1) | Done |
+| LLM Generation | Anthropic direct API | Bedrock Claude Haiku 4.5 | Done |
+| Embeddings | sentence-transformers (384d) | Bedrock Titan V2 (1024d) | Done |
+| Reranker | SimpleReranker (Jaccard) | Cohere Rerank (Bedrock) | Phase 2 |
+| PHI Redaction | Regex patterns | AWS Comprehend Medical | Done (config-driven) |
+| Authentication | Mock (Bearer token = patient_id) | Cognito JWT (custom:patient_id) | Phase 2 |
+| BM25 Retrieval | Enabled (ChromaDB corpus) | Disabled for S3 Vectors | Phase 2 (DynamoDB corpus) |
+| Data Loaders | Generic /api/v1/ingest endpoint | HealthKit/FHIR/EHR dedicated loaders | Phase 2 |
+| Infrastructure | Docker Compose | Terraform (5 modules, VPC, PrivateLink) | Done (scaffolding) |
 
 ## Testing
 
