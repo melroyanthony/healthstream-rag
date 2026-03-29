@@ -52,7 +52,7 @@ resource "aws_lambda_function" "query" {
       VECTOR_BACKEND    = var.vector_backend
       LLM_BACKEND       = "bedrock"
       EMBEDDER_BACKEND  = "bedrock"
-      MOCK_AUTH         = "true"
+      MOCK_AUTH         = "false"
       APP_AWS_REGION    = var.aws_region
       S3_VECTORS_BUCKET = var.s3_vectors_bucket_name
     }

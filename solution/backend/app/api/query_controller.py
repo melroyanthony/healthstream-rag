@@ -40,8 +40,8 @@ class QueryController:
         self._metadata_store = metadata_store
 
         vector_retriever = VectorRetriever(vector_db, embedder)
-        if settings.bm25_enabled and settings.vector_backend != "s3vectors":
-            bm25_retriever = BM25Retriever(vector_db)
+        if settings.bm25_enabled:
+            bm25_retriever = BM25Retriever(vector_db, metadata_store=metadata_store)
         else:
             bm25_retriever = None
         self._hybrid = HybridRetriever(vector_retriever, bm25_retriever)
