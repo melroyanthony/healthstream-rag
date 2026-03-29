@@ -143,6 +143,7 @@ resource "aws_apigatewayv2_stage" "default" {
 resource "aws_cloudwatch_log_group" "api_access" {
   name              = "/aws/apigateway/healthstream-${var.environment}"
   retention_in_days = 90
+  kms_key_id        = var.kms_key_arn
 
   tags = { Name = "healthstream-api-logs" }
 }
