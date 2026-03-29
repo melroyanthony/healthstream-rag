@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.2](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.0.2) (2026-03-29)
+
+### Bug Fixes
+
+* sort imports to pass ruff linting in CI
+
 ## [1.0.1](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.0.1) (2026-03-29)
 
 ### CI/CD
