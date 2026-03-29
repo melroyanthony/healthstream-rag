@@ -4,10 +4,11 @@ import uuid
 
 from fastapi import APIRouter, Depends
 
-from app.api.dependencies import get_embedder, get_vector_db
+from app.api.dependencies import get_embedder, get_metadata_store, get_vector_db
 from app.config import settings
 from app.core.base_embedder import BaseEmbedder
 from app.core.base_vector_db import BaseVectorDB
+from app.metadata_store.dynamo_store import DynamoMetadataStore
 from app.middleware.patient_isolation import get_patient_id
 from app.middleware.phi_redaction import redact_phi
 from app.models.schemas import IngestRequest, IngestResponse
@@ -21,11 +22,12 @@ def ingest_documents(
     patient_id: str = Depends(get_patient_id),
     vector_db: BaseVectorDB = Depends(get_vector_db),
     embedder: BaseEmbedder = Depends(get_embedder),
+    metadata_store: DynamoMetadataStore = Depends(get_metadata_store),
 ) -> IngestResponse:
     """
     Ingest documents into the RAG pipeline.
 
-    Pipeline: parse -> PHI redact -> embed -> store.
+    Pipeline: parse -> PHI redact -> embed -> store (vector + metadata).
     Patient ID from JWT is attached to all documents.
     """
     ids = []
@@ -69,6 +71,17 @@ def ingest_documents(
         documents=texts,
         metadatas=metadatas,
     )
+
+    # Record ingestion metadata in DynamoDB (audit + incremental indexing)
+    for i, chunk_id in enumerate(ids):
+        metadata_store.record_ingestion(
+            patient_id=patient_id,
+            chunk_id=chunk_id,
+            text=texts[i],
+            source_type=metadatas[i]["source_type"],
+            source_id=metadatas[i]["source_id"],
+            collection_name=request.collection_name,
+        )
 
     return IngestResponse(
         ingested_count=count,
