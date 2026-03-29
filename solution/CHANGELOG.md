@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.0](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.2.0) (2026-03-29)
+
+### Features
+
+* add AWS deployment tooling and guide (#19)
+
 ## [1.1.1](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.1.1) (2026-03-29)
 
 ### Documentation
