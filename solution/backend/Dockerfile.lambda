@@ -1,0 +1,28 @@
+# Lambda container image — production deployment
+# Uses AWS base image with Lambda Runtime Interface Client
+# Size: ~150MB (no torch/sentence-transformers/chromadb)
+#
+# Build:
+#   docker build -f Dockerfile.lambda -t healthstream-rag-lambda .
+#
+# Push to ECR:
+#   aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin <ACCOUNT>.dkr.ecr.eu-west-1.amazonaws.com
+#   docker tag healthstream-rag-lambda:latest <ACCOUNT>.dkr.ecr.eu-west-1.amazonaws.com/healthstream-rag:latest
+#   docker push <ACCOUNT>.dkr.ecr.eu-west-1.amazonaws.com/healthstream-rag:latest
+
+FROM public.ecr.aws/lambda/python:3.13
+
+# Install production-only dependencies (no torch, no chromadb, no sentence-transformers)
+COPY requirements-lambda.txt ${LAMBDA_TASK_ROOT}/
+# Install deps to LAMBDA_TASK_ROOT so they take precedence over
+# the Lambda runtime's bundled packages (which lack s3vectors support)
+RUN pip install --no-cache-dir --target ${LAMBDA_TASK_ROOT} -r ${LAMBDA_TASK_ROOT}/requirements-lambda.txt
+
+# Copy application code
+COPY app/ ${LAMBDA_TASK_ROOT}/app/
+
+# Ensure LAMBDA_TASK_ROOT is first in PYTHONPATH (overrides runtime boto3)
+ENV PYTHONPATH=${LAMBDA_TASK_ROOT}
+
+# Lambda handler: app.api.lambda_handler.handler
+CMD ["app.api.lambda_handler.handler"]

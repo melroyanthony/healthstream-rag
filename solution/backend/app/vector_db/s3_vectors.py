@@ -34,29 +34,46 @@ class S3VectorsVectorDB(BaseVectorDB):
             import boto3
 
             self._client = boto3.client("s3vectors", region_name=region)
+            self._ensure_vector_bucket()
         except Exception:
             logger.warning("boto3 s3vectors client not available, using mock mode")
             self._client = None
+
+    def _ensure_vector_bucket(self) -> None:
+        """Create the vector bucket if it doesn't exist."""
+        try:
+            self._client.get_vector_bucket(vectorBucketName=self._bucket_name)
+        except self._client.exceptions.NotFoundException:
+            logger.info("Creating vector bucket: %s", self._bucket_name)
+            self._client.create_vector_bucket(vectorBucketName=self._bucket_name)
+        except Exception as e:
+            logger.warning("Could not verify vector bucket: %s", e)
 
     def create_collection(self, name: str, dimension: int) -> None:
         """Create an S3 Vectors index (idempotent)."""
         if not self._client:
             return
         try:
-            self._client.create_vector_index(
+            self._client.create_index(
                 vectorBucketName=self._bucket_name,
                 indexName=f"{self._index_name}-{name}",
+                dataType="float32",
                 dimension=dimension,
                 distanceMetric="cosine",
             )
-        except self._client.exceptions.ConflictException:
-            pass
+        except Exception as e:
+            msg = str(e).lower()
+            if "conflict" in msg or "already exists" in msg or "already" in msg:
+                pass  # Index already exists — idempotent
+            else:
+                logger.error("Failed to create index: %s", e)
+                raise
 
     def delete_collection(self, name: str) -> None:
         """Delete an S3 Vectors index."""
         if not self._client:
             return
-        self._client.delete_vector_index(
+        self._client.delete_index(
             vectorBucketName=self._bucket_name,
             indexName=f"{self._index_name}-{name}",
         )
@@ -65,7 +82,7 @@ class S3VectorsVectorDB(BaseVectorDB):
         """List S3 Vectors indexes."""
         if not self._client:
             return []
-        response = self._client.list_vector_indexes(
+        response = self._client.list_indexes(
             vectorBucketName=self._bucket_name,
         )
         prefix = f"{self._index_name}-"
@@ -121,13 +138,8 @@ class S3VectorsVectorDB(BaseVectorDB):
             indexName=f"{self._index_name}-{collection_name}",
             queryVector={"float32": query_embedding},
             topK=top_k,
-            filter={
-                "equals": {
-                    "key": "patient_id",
-                    "stringValue": patient_id,
-                }
-            },
-            includeMetadata=True,
+            filter={"patient_id": patient_id},
+            returnMetadata=True,
         )
         results = []
         for hit in response.get("vectors", []):
@@ -158,7 +170,7 @@ class S3VectorsVectorDB(BaseVectorDB):
         """Return approximate vector count."""
         if not self._client:
             return 0
-        response = self._client.describe_vector_index(
+        response = self._client.get_index(
             vectorBucketName=self._bucket_name,
             indexName=f"{self._index_name}-{collection_name}",
         )

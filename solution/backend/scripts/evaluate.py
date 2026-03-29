@@ -164,6 +164,17 @@ def check_phi_leakage(answer: str) -> tuple[bool, list[str]]:
 
 def _build_test_client(chroma_dir: str):
     """Build a FastAPI TestClient with overridden dependencies."""
+    # Load .env file so ANTHROPIC_API_KEY is available
+    env_path = Path(__file__).resolve().parent.parent / ".env"
+    if env_path.exists():
+        for line in env_path.read_text().splitlines():
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                key, _, value = line.partition("=")
+                k, v = key.strip(), value.strip()
+                if v:  # only override if .env has a non-empty value
+                    os.environ[k] = v
+
     from fastapi.testclient import TestClient
 
     from app.api.dependencies import get_embedder, get_query_controller, get_vector_db
@@ -180,7 +191,9 @@ def _build_test_client(chroma_dir: str):
     db = ChromaVectorDB(persist_directory=chroma_dir)
     embedder = LocalEmbedder()
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-    generator = AnthropicGenerator(api_key=api_key, model="claude-haiku-4-5-20250315")
+    mode = "Anthropic API (real LLM)" if api_key else "Mock generator (no API key)"
+    print(f"      LLM mode: {mode}")
+    generator = AnthropicGenerator(api_key=api_key, model="claude-haiku-4-5-20251001")
     controller = QueryController(vector_db=db, embedder=embedder, generator=generator)
 
     app = create_app()

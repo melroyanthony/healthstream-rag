@@ -84,3 +84,9 @@ credentials.json
 
 # ChromaDB data
 chroma_data/
+
+# Terraform
+solution/infra/terraform/.terraform/
+solution/infra/terraform/*.tfstate*
+solution/infra/terraform/*.plan
+solution/infra/terraform/.terraform.lock.hcl

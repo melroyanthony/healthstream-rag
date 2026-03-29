@@ -180,7 +180,12 @@ resource "aws_iam_role_policy" "lambda_permissions" {
           "bedrock:InvokeModel",
           "bedrock:InvokeModelWithResponseStream",
         ]
-        Resource = "arn:aws:bedrock:${var.aws_region}::foundation-model/*"
+        Resource = [
+          "arn:aws:bedrock:${var.aws_region}::foundation-model/*",
+          "arn:aws:bedrock:${var.aws_region}:${data.aws_caller_identity.current.account_id}:inference-profile/*",
+          "arn:aws:bedrock:eu-west-1::inference-profile/*",
+          "arn:aws:bedrock:eu-central-1::inference-profile/*",
+        ]
       },
       {
         Sid    = "ComprehendMedical"

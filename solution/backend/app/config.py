@@ -30,13 +30,13 @@ class Settings(BaseSettings):
 
     # Anthropic (local dev)
     anthropic_api_key: str = ""
-    anthropic_model: str = "claude-haiku-4-5-20250315"
+    anthropic_model: str = "claude-haiku-4-5-20251001"
 
     # AWS (production)
     aws_region: str = "eu-west-1"
     s3_vectors_bucket: str = "healthstream-vectors"
     s3_vectors_index: str = "healthstream"
-    bedrock_llm_model: str = "anthropic.claude-haiku-4-5-20250315-v1:0"
+    bedrock_llm_model: str = "anthropic.claude-3-haiku-20240307-v1:0"
     bedrock_embedding_model: str = "amazon.titan-embed-text-v2:0"
     bedrock_embedding_dimension: int = 1024
 
@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     bm25_enabled: bool = True
 
     # Guardrails
-    grounding_threshold: float = 0.85
+    grounding_threshold: float = 0.4
     medical_disclaimer: str = (
         "This information is from your health records. "
         "Always consult your care team."

@@ -2,7 +2,7 @@
 # Region: eu-west-1 (Ireland) — S3 Vectors GA, GDPR-friendly
 
 terraform {
-  required_version = ">= 1.7"
+  required_version = ">= 1.5"
 
   required_providers {
     aws = {
@@ -62,6 +62,12 @@ variable "lambda_timeout" {
   default     = 30
 }
 
+variable "ecr_image_uri" {
+  description = "ECR image URI for Lambda container"
+  type        = string
+  default     = ""
+}
+
 # --- Modules ---
 
 module "networking" {
@@ -101,6 +107,7 @@ module "compute" {
   lambda_execution_role_name = module.security.lambda_execution_role_name
   vector_backend            = var.vector_backend
   s3_vectors_bucket_name    = module.storage.s3_vectors_bucket_name
+  ecr_image_uri             = var.ecr_image_uri
 }
 
 module "monitoring" {

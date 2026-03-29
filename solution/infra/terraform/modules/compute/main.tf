@@ -16,6 +16,7 @@ variable "lambda_execution_role_arn" { type = string }
 variable "lambda_execution_role_name" { type = string }
 variable "vector_backend" { type = string }
 variable "s3_vectors_bucket_name" { type = string }
+variable "ecr_image_uri" { type = string }
 
 # Lambda log group — explicit with KMS encryption and retention
 resource "aws_cloudwatch_log_group" "lambda_query" {
@@ -31,17 +32,14 @@ resource "aws_lambda_function" "query" {
   function_name = "healthstream-${var.environment}-query"
   role          = var.lambda_execution_role_arn
   kms_key_arn   = var.kms_key_arn
-  handler       = "app.api.lambda_handler.handler"
-  runtime       = "python3.13"
+  package_type  = "Image"
+  image_uri     = "${var.ecr_image_uri}:latest"
   memory_size   = var.lambda_memory_mb
   timeout       = var.lambda_timeout
   architectures = ["arm64"]
 
-  # Placeholder — CI/CD pipeline deploys the real artifact
-  filename = "${path.module}/placeholder.zip"
-
   lifecycle {
-    ignore_changes = [filename, source_code_hash]
+    ignore_changes = [image_uri]
   }
 
   vpc_config {
@@ -55,12 +53,12 @@ resource "aws_lambda_function" "query" {
       LLM_BACKEND       = "bedrock"
       EMBEDDER_BACKEND  = "bedrock"
       MOCK_AUTH         = "true"
-      AWS_REGION        = var.aws_region
+      APP_AWS_REGION    = var.aws_region
       S3_VECTORS_BUCKET = var.s3_vectors_bucket_name
     }
   }
 
-  reserved_concurrent_executions = 100
+  reserved_concurrent_executions = -1  # unreserved (use account default for demo)
 
   tags = { Name = "healthstream-query" }
 }
@@ -93,12 +91,17 @@ resource "aws_iam_role_policy" "lambda_data_access" {
         Sid    = "S3VectorsAccess"
         Effect = "Allow"
         Action = [
-          "s3vectors:QueryVectors",
+          "s3vectors:CreateVectorBucket",
+          "s3vectors:GetVectorBucket",
+          "s3vectors:CreateIndex",
+          "s3vectors:GetIndex",
+          "s3vectors:ListIndexes",
+          "s3vectors:DeleteIndex",
           "s3vectors:PutVectors",
+          "s3vectors:QueryVectors",
           "s3vectors:DeleteVectors",
-          "s3vectors:CreateVectorIndex",
-          "s3vectors:DescribeVectorIndex",
-          "s3vectors:ListVectorIndexes",
+          "s3vectors:GetVectors",
+          "s3vectors:ListVectors",
         ]
         # S3 Vectors (GA Dec 2025) uses bucket-level ARNs but vector index
         # operations require wildcard — no index-level ARN scoping available yet

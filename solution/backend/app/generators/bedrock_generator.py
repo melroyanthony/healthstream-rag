@@ -19,7 +19,7 @@ class BedrockGenerator(BaseGenerator):
 
     def __init__(
         self,
-        model_id: str = "anthropic.claude-haiku-4-5-20250315-v1:0",
+        model_id: str = "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
         region: str = "eu-west-1",
     ) -> None:
         self._model_id = model_id

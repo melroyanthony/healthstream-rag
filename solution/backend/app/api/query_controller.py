@@ -5,7 +5,8 @@
 3. Rerank top-K
 4. Generate response with citations
 5. Apply guardrails
-6. Return response with disclaimer
+6. Record session (DynamoDB audit trail)
+7. Return response with disclaimer
 """
 
 import time
@@ -15,6 +16,7 @@ from app.core.base_embedder import BaseEmbedder
 from app.core.base_generator import BaseGenerator
 from app.core.base_vector_db import BaseVectorDB
 from app.guardrails.pipeline import apply_guardrails
+from app.metadata_store.dynamo_store import DynamoMetadataStore
 from app.models.schemas import Citation, QueryMetadata, QueryResponse
 from app.retrievers.bm25_retriever import BM25Retriever
 from app.retrievers.hybrid_retriever import HybridRetriever
@@ -23,17 +25,19 @@ from app.retrievers.vector_retriever import VectorRetriever
 
 
 class QueryController:
-    """Orchestrates retrieve -> rerank -> generate -> cite."""
+    """Orchestrates retrieve -> rerank -> generate -> cite -> audit."""
 
     def __init__(
         self,
         vector_db: BaseVectorDB,
         embedder: BaseEmbedder,
         generator: BaseGenerator,
+        metadata_store: DynamoMetadataStore | None = None,
     ) -> None:
         self._vector_db = vector_db
         self._embedder = embedder
         self._generator = generator
+        self._metadata_store = metadata_store
 
         vector_retriever = VectorRetriever(vector_db, embedder)
         if settings.bm25_enabled and settings.vector_backend != "s3vectors":
@@ -93,6 +97,18 @@ class QueryController:
         ]
 
         elapsed_ms = (time.time() - start) * 1000
+        model = self._generator.model_name()
+
+        # Record session in DynamoDB (audit trail + multi-turn context)
+        if self._metadata_store:
+            self._metadata_store.record_query_session(
+                patient_id=patient_id,
+                question=question,
+                answer=answer,
+                citation_count=len(citations),
+                model=model,
+                latency_ms=elapsed_ms,
+            )
 
         return QueryResponse(
             answer=answer,
@@ -100,7 +116,7 @@ class QueryController:
             disclaimer=settings.medical_disclaimer,
             metadata=QueryMetadata(
                 retrieval_count=len(retrieved),
-                model=self._generator.model_name(),
+                model=model,
                 latency_ms=round(elapsed_ms, 1),
             ),
         )
