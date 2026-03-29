@@ -165,6 +165,15 @@ solution/
 │   └── scripts/               # Ingestion scripts
 ├── scripts/
 │   └── test-e2e.sh            # E2E happy path test
+├── infra/
+│   └── terraform/             # AWS IaC (5 modules)
+│       ├── main.tf            # Root module + variables
+│       └── modules/
+│           ├── networking/    # VPC, PrivateLink endpoints
+│           ├── compute/       # Lambda, API Gateway
+│           ├── storage/       # S3 Vectors, DynamoDB, S3
+│           ├── security/      # KMS, Cognito, IAM
+│           └── monitoring/    # CloudTrail, CloudWatch
 ├── checkpoints/               # Stage validation reports
 ├── .github/workflows/ci.yml   # CI/CD pipeline
 ├── docker-compose.yml         # Local dev: FastAPI backend (embedded ChromaDB)
@@ -185,6 +194,35 @@ All configuration via environment variables (see `backend/.env.example`):
 | `MOCK_AUTH` | `true` | Use mock JWT authentication |
 | `AWS_REGION` | `eu-west-1` | AWS region for production services |
 
+## Architecture Documentation
+
+### C4 Diagrams (Mermaid — renders on GitHub)
+| Level | Diagram | Description |
+|-------|---------|-------------|
+| L1 | [System Context](docs/architecture/c4/c4-context.md) | Patients, clinicians, external data sources |
+| L2 | [Container](docs/architecture/c4/c4-container.md) | API Gateway, Query Orchestrator, Ingestion, data stores |
+| L3 | [Component — Query](docs/architecture/c4/c4-component-query.md) | RAG pipeline: hybrid retrieval, reranking, guardrails |
+| L3 | [Component — Ingestion](docs/architecture/c4/c4-component-ingestion.md) | 3 loaders, PHI redaction, embedding |
+| - | [Deployment](docs/architecture/c4/c4-deployment.md) | AWS eu-west-1 topology, VPC, PrivateLink |
+| - | [HIPAA Controls](docs/architecture/c4/hipaa-controls.md) | 4-layer defense model, control mapping |
+
+**Canonical source**: [workspace.dsl](docs/architecture/workspace.dsl) (Structurizr)
+
+### Architecture Decision Records
+| ADR | Decision |
+|-----|----------|
+| [ADR-001](docs/decisions/ADR-001-s3-vectors-primary-vector-store.md) | S3 Vectors as primary vector store ($0 idle, ~100ms, 2B vectors) |
+| [ADR-002](docs/decisions/ADR-002-cognita-patterns-not-codebase.md) | Cognita design patterns, not codebase (archived March 2026) |
+| [ADR-003](docs/decisions/ADR-003-dynamodb-over-aurora-for-structured-data.md) | DynamoDB over Aurora (zero idle cost, Lambda-native) |
+| [ADR-004](docs/decisions/ADR-004-async-queue-pattern-for-bedrock.md) | Async queue pattern for Bedrock at >500 sustained QPS |
+| [ADR-005](docs/decisions/ADR-005-hybrid-retrieval-for-medical-terminology.md) | Hybrid retrieval (vector + BM25) for medical terminology |
+| [ADR-006](docs/decisions/ADR-006-bedrock-claude-haiku-for-generation.md) | Claude Haiku 4.5 for generation ($0.0045/query) |
+
+### Other Architecture Docs
+- [System Design](docs/architecture/system-design.md) — scale analysis, patterns, trade-offs
+- [Database Schema](docs/architecture/database-schema.md) — vector store + DynamoDB tables
+- [OpenAPI Spec](docs/architecture/openapi.yaml) — 6 endpoints, full schemas
+
 ## Key Design Decisions
 
 1. **S3 Vectors over OpenSearch**: Pay-per-query ($0 idle) vs $345/month floor. ~100ms latency acceptable since LLM generation dominates pipeline time.
@@ -194,6 +232,22 @@ All configuration via environment variables (see `backend/.env.example`):
 3. **DynamoDB over Aurora**: Zero idle cost, Lambda-native (no connection pooling), free tier covers demo.
 
 4. **Hybrid retrieval**: Vector semantic + BM25 keyword for medical terminology exact match (drug names, ICD-10 codes, device identifiers).
+
+## AWS Deployment (Terraform)
+
+> **Note:** Terraform provisions infrastructure scaffolding. The Lambda deploys with a placeholder artifact — a CI/CD pipeline (or `make deploy-lambda`) replaces it with the real application package. `MOCK_AUTH=true` is set for the demo; production JWT validation requires Cognito integration.
+
+```bash
+cd solution/infra/terraform
+terraform init
+terraform plan -out=healthstream.plan
+terraform apply healthstream.plan
+
+# After infra is up, deploy the Lambda artifact:
+# cd solution/backend && make deploy-lambda
+```
+
+5 modules: `networking` (VPC + PrivateLink), `compute` (Lambda + API Gateway), `storage` (S3 Vectors + DynamoDB), `security` (KMS + Cognito + IAM), `monitoring` (CloudTrail + CloudWatch).
 
 ## Testing
 
