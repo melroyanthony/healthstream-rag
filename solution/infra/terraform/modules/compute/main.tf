@@ -17,6 +17,15 @@ variable "lambda_execution_role_name" { type = string }
 variable "vector_backend" { type = string }
 variable "s3_vectors_bucket_name" { type = string }
 
+# Lambda log group — explicit with KMS encryption and retention
+resource "aws_cloudwatch_log_group" "lambda_query" {
+  name              = "/aws/lambda/healthstream-${var.environment}-query"
+  retention_in_days = 90
+  kms_key_id        = var.kms_key_arn
+
+  tags = { Name = "healthstream-lambda-query-logs" }
+}
+
 # Lambda — Query Orchestrator
 resource "aws_lambda_function" "query" {
   function_name = "healthstream-${var.environment}-query"
@@ -71,7 +80,6 @@ resource "aws_iam_role_policy" "lambda_data_access" {
           "dynamodb:GetItem",
           "dynamodb:PutItem",
           "dynamodb:Query",
-          "dynamodb:Scan",
           "dynamodb:BatchWriteItem",
         ]
         Resource = [
@@ -92,6 +100,8 @@ resource "aws_iam_role_policy" "lambda_data_access" {
           "s3vectors:DescribeVectorIndex",
           "s3vectors:ListVectorIndexes",
         ]
+        # S3 Vectors (GA Dec 2025) uses bucket-level ARNs but vector index
+        # operations require wildcard — no index-level ARN scoping available yet
         Resource = "*"
       },
       {
