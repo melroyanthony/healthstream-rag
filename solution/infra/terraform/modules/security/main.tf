@@ -44,8 +44,14 @@ resource "aws_kms_key" "healthstream" {
           "kms:ReEncrypt*",
           "kms:GenerateDataKey*",
           "kms:Describe*",
+          "kms:CreateGrant",
         ]
         Resource = "*"
+        Condition = {
+          ArnLike = {
+            "kms:EncryptionContext:aws:logs:arn" = "arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:*"
+          }
+        }
       },
     ]
   })
