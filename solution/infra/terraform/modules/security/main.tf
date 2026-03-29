@@ -53,6 +53,26 @@ resource "aws_kms_key" "healthstream" {
           }
         }
       },
+      {
+        Sid    = "DynamoDBAndS3Encrypt"
+        Effect = "Allow"
+        Principal = { AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root" }
+        Action = [
+          "kms:Decrypt",
+          "kms:GenerateDataKey*",
+          "kms:CreateGrant",
+          "kms:DescribeKey",
+        ]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "kms:ViaService" = [
+              "dynamodb.${var.aws_region}.amazonaws.com",
+              "s3.${var.aws_region}.amazonaws.com",
+            ]
+          }
+        }
+      },
     ]
   })
 
@@ -185,7 +205,7 @@ resource "aws_iam_role_policy" "lambda_permissions" {
           "logs:CreateLogStream",
           "logs:PutLogEvents",
         ]
-        Resource = "arn:aws:logs:${var.aws_region}:*:*"
+        Resource = "arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:*"
       },
     ]
   })
