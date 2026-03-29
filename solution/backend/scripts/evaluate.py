@@ -214,7 +214,10 @@ def _ingest_sample_data(
         json=payload,
     )
     if response.status_code != 200:
-        print(f"  [WARN] Ingest returned {response.status_code}: {response.text}")
+        raise RuntimeError(
+            f"Ingestion failed (HTTP {response.status_code}): {response.text}. "
+            "Cannot produce valid evaluation metrics without data."
+        )
 
 
 # ---------------------------------------------------------------------------
