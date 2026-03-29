@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.0](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.4.0) (2026-03-29)
+
+### Features
+
+* Phase 2 — Haiku 4.5, BM25 via DynamoDB, data loaders, WAF, JWT decode (#24)
+
 ## [1.3.1](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.3.1) (2026-03-29)
 
 ### Documentation
