@@ -55,12 +55,12 @@ resource "aws_lambda_function" "query" {
       LLM_BACKEND       = "bedrock"
       EMBEDDER_BACKEND  = "bedrock"
       MOCK_AUTH         = "true"
-      AWS_REGION        = var.aws_region
+      APP_AWS_REGION    = var.aws_region
       S3_VECTORS_BUCKET = var.s3_vectors_bucket_name
     }
   }
 
-  reserved_concurrent_executions = 100
+  reserved_concurrent_executions = -1  # unreserved (use account default for demo)
 
   tags = { Name = "healthstream-query" }
 }
