@@ -99,6 +99,8 @@ resource "aws_iam_role_policy" "lambda_permissions" {
           "ec2:CreateNetworkInterface",
           "ec2:DescribeNetworkInterfaces",
           "ec2:DeleteNetworkInterface",
+          "ec2:AssignPrivateIpAddresses",
+          "ec2:UnassignPrivateIpAddresses",
         ]
         Resource = "*"
       },
@@ -144,3 +146,4 @@ output "kms_key_arn" { value = aws_kms_key.healthstream.arn }
 output "cognito_user_pool_id" { value = aws_cognito_user_pool.patients.id }
 output "cognito_user_pool_arn" { value = aws_cognito_user_pool.patients.arn }
 output "lambda_execution_role_arn" { value = aws_iam_role.lambda_execution.arn }
+output "cognito_client_id" { value = aws_cognito_user_pool_client.app.id }

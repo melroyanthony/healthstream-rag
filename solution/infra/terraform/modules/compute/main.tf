@@ -11,11 +11,14 @@ variable "dynamodb_table_arn" { type = string }
 variable "s3_bucket_arn" { type = string }
 variable "kms_key_arn" { type = string }
 variable "cognito_user_pool_arn" { type = string }
+variable "cognito_client_id" { type = string }
+variable "lambda_execution_role_arn" { type = string }
 
 # Lambda — Query Orchestrator
 resource "aws_lambda_function" "query" {
   function_name = "healthstream-${var.environment}-query"
-  role          = data.aws_iam_role.lambda.arn
+  role          = var.lambda_execution_role_arn
+  kms_key_arn   = var.kms_key_arn
   handler       = "app.api.lambda_handler.handler"
   runtime       = "python3.13"
   memory_size   = var.lambda_memory_mb
@@ -45,14 +48,10 @@ resource "aws_lambda_function" "query" {
   tags = { Name = "healthstream-query" }
 }
 
-data "aws_iam_role" "lambda" {
-  name = "healthstream-${var.environment}-lambda"
-}
-
 # IAM policy for Lambda to access DynamoDB and S3
 resource "aws_iam_role_policy" "lambda_data_access" {
   name = "healthstream-${var.environment}-data-access"
-  role = data.aws_iam_role.lambda.id
+  role = split("/", var.lambda_execution_role_arn)[1]
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -168,7 +167,7 @@ resource "aws_apigatewayv2_authorizer" "cognito" {
   name             = "cognito-jwt"
 
   jwt_configuration {
-    audience = [aws_apigatewayv2_api.main.id]
+    audience = [var.cognito_client_id]
     issuer   = "https://cognito-idp.${var.aws_region}.amazonaws.com/${split("/", var.cognito_user_pool_arn)[1]}"
   }
 }

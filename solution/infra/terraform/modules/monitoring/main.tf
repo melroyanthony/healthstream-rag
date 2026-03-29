@@ -2,6 +2,8 @@
 
 variable "environment" { type = string }
 variable "lambda_query_name" { type = string }
+variable "aws_region" { type = string }
+variable "kms_key_arn" { type = string }
 
 # CloudTrail — HIPAA audit trail for all API calls
 resource "aws_cloudtrail" "audit" {
@@ -22,6 +24,21 @@ resource "aws_cloudtrail" "audit" {
 resource "aws_s3_bucket" "audit_logs" {
   bucket = "healthstream-${var.environment}-audit-logs"
   tags   = { Name = "healthstream-audit-logs" }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "audit_logs" {
+  bucket = aws_s3_bucket.audit_logs.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = var.kms_key_arn
+    }
+  }
+}
+
+resource "aws_s3_bucket_versioning" "audit_logs" {
+  bucket = aws_s3_bucket.audit_logs.id
+  versioning_configuration { status = "Enabled" }
 }
 
 resource "aws_s3_bucket_policy" "audit_logs" {
@@ -86,7 +103,7 @@ resource "aws_cloudwatch_metric_alarm" "lambda_duration" {
   metric_name         = "Duration"
   namespace           = "AWS/Lambda"
   period              = 300
-  statistic           = "p95"
+  extended_statistic   = "p95"
   threshold           = 10000
   alarm_description   = "Lambda P95 latency exceeds 10s"
 
@@ -117,7 +134,7 @@ resource "aws_cloudwatch_dashboard" "main" {
           ]
           period = 300
           stat   = "Sum"
-          region = "eu-west-1"
+          region = var.aws_region
         }
       },
       {
@@ -134,7 +151,7 @@ resource "aws_cloudwatch_dashboard" "main" {
             ["AWS/Lambda", "Duration", "FunctionName", var.lambda_query_name, { stat = "p99" }],
           ]
           period = 300
-          region = "eu-west-1"
+          region = var.aws_region
         }
       },
     ]

@@ -4,15 +4,19 @@ variable "environment" { type = string }
 variable "vector_backend" { type = string }
 variable "kms_key_arn" { type = string }
 
-# S3 Vectors bucket (primary vector store)
+data "aws_caller_identity" "current" {}
+
+# S3 Vectors bucket (primary vector store) — only when vector_backend = s3vectors
 resource "aws_s3_bucket" "vectors" {
-  bucket = "healthstream-${var.environment}-vectors"
+  count  = var.vector_backend == "s3vectors" ? 1 : 0
+  bucket = "healthstream-${var.environment}-vectors-${data.aws_caller_identity.current.account_id}"
 
   tags = { Name = "healthstream-vectors" }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "vectors" {
-  bucket = aws_s3_bucket.vectors.id
+  count  = var.vector_backend == "s3vectors" ? 1 : 0
+  bucket = aws_s3_bucket.vectors[0].id
 
   rule {
     apply_server_side_encryption_by_default {
@@ -24,12 +28,14 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "vectors" {
 }
 
 resource "aws_s3_bucket_versioning" "vectors" {
-  bucket = aws_s3_bucket.vectors.id
+  count  = var.vector_backend == "s3vectors" ? 1 : 0
+  bucket = aws_s3_bucket.vectors[0].id
   versioning_configuration { status = "Enabled" }
 }
 
 resource "aws_s3_bucket_public_access_block" "vectors" {
-  bucket                  = aws_s3_bucket.vectors.id
+  count                   = var.vector_backend == "s3vectors" ? 1 : 0
+  bucket                  = aws_s3_bucket.vectors[0].id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -38,7 +44,7 @@ resource "aws_s3_bucket_public_access_block" "vectors" {
 
 # S3 bucket for raw encrypted health records
 resource "aws_s3_bucket" "documents" {
-  bucket = "healthstream-${var.environment}-documents"
+  bucket = "healthstream-${var.environment}-documents-${data.aws_caller_identity.current.account_id}"
 
   tags = { Name = "healthstream-documents" }
 }
@@ -53,6 +59,11 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "documents" {
     }
     bucket_key_enabled = true
   }
+}
+
+resource "aws_s3_bucket_versioning" "documents" {
+  bucket = aws_s3_bucket.documents.id
+  versioning_configuration { status = "Enabled" }
 }
 
 resource "aws_s3_bucket_public_access_block" "documents" {
@@ -135,4 +146,4 @@ resource "aws_dynamodb_table" "sessions" {
 
 output "dynamodb_table_arn" { value = aws_dynamodb_table.patient_documents.arn }
 output "s3_bucket_arn" { value = aws_s3_bucket.documents.arn }
-output "s3_vectors_bucket_name" { value = aws_s3_bucket.vectors.bucket }
+output "s3_vectors_bucket_name" { value = var.vector_backend == "s3vectors" ? aws_s3_bucket.vectors[0].bucket : "" }

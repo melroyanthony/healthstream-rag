@@ -84,23 +84,27 @@ module "storage" {
 }
 
 module "compute" {
-  source             = "./modules/compute"
-  environment        = var.environment
-  aws_region         = var.aws_region
-  lambda_memory_mb   = var.lambda_memory_mb
-  lambda_timeout     = var.lambda_timeout
-  vpc_id             = module.networking.vpc_id
-  private_subnet_ids = module.networking.private_subnet_ids
-  security_group_id  = module.networking.lambda_security_group_id
-  dynamodb_table_arn = module.storage.dynamodb_table_arn
-  s3_bucket_arn      = module.storage.s3_bucket_arn
-  kms_key_arn        = module.security.kms_key_arn
-  cognito_user_pool_arn = module.security.cognito_user_pool_arn
+  source                    = "./modules/compute"
+  environment               = var.environment
+  aws_region                = var.aws_region
+  lambda_memory_mb          = var.lambda_memory_mb
+  lambda_timeout            = var.lambda_timeout
+  vpc_id                    = module.networking.vpc_id
+  private_subnet_ids        = module.networking.private_subnet_ids
+  security_group_id         = module.networking.lambda_security_group_id
+  dynamodb_table_arn        = module.storage.dynamodb_table_arn
+  s3_bucket_arn             = module.storage.s3_bucket_arn
+  kms_key_arn               = module.security.kms_key_arn
+  cognito_user_pool_arn     = module.security.cognito_user_pool_arn
+  cognito_client_id         = module.security.cognito_client_id
+  lambda_execution_role_arn = module.security.lambda_execution_role_arn
 }
 
 module "monitoring" {
   source            = "./modules/monitoring"
   environment       = var.environment
+  aws_region        = var.aws_region
+  kms_key_arn       = module.security.kms_key_arn
   lambda_query_name = module.compute.lambda_query_function_name
 }
 

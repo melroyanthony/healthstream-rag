@@ -30,11 +30,11 @@ resource "aws_security_group" "lambda" {
   vpc_id      = aws_vpc.main.id
 
   egress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "HTTPS to AWS services via VPC endpoints"
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    self            = true
+    description     = "HTTPS to VPC endpoints only (defense-in-depth)"
   }
 
   tags = { Name = "healthstream-lambda-sg" }
