@@ -110,7 +110,9 @@ class FHIRLoader(BaseDataLoader):
         code = resource.get("code", {}).get("text", "Observation")
         value = resource.get("valueQuantity", {})
         val_str = f"{value.get('value', '')} {value.get('unit', '')}".strip()
-        return f"FHIR Observation: {code}. Value: {val_str}." if val_str else f"FHIR Observation: {code}."
+        if val_str:
+            return f"FHIR Observation: {code}. Value: {val_str}."
+        return f"FHIR Observation: {code}."
 
 
 def _flatten_resource(resource: dict) -> str:

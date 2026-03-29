@@ -4,15 +4,14 @@ import uuid
 
 from fastapi import APIRouter, Depends
 
-from app.api.dependencies import get_embedder, get_metadata_store, get_vector_db
-from app.config import settings
-from app.core.base_embedder import BaseEmbedder
-from app.core.base_vector_db import BaseVectorDB
-
 # Import loaders to trigger registration via @register_loader decorators
 import app.loaders.ehr_loader  # noqa: F401
 import app.loaders.fhir_loader  # noqa: F401
 import app.loaders.healthkit_loader  # noqa: F401
+from app.api.dependencies import get_embedder, get_metadata_store, get_vector_db
+from app.config import settings
+from app.core.base_embedder import BaseEmbedder
+from app.core.base_vector_db import BaseVectorDB
 from app.loaders.base import LOADER_REGISTRY, get_loader
 from app.metadata_store.dynamo_store import DynamoMetadataStore
 from app.middleware.patient_isolation import get_patient_id
