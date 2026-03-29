@@ -109,10 +109,13 @@ def ingest_from_source(
 
     Uses the Cognita-inspired loader registry to auto-select
     the appropriate parser (HealthKit, FHIR, EHR) based on source_type.
-
-    Available loaders: {list(LOADER_REGISTRY.keys())}
     """
-    loader = get_loader(source_type)
+    from fastapi import HTTPException
+
+    try:
+        loader = get_loader(source_type)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     loaded_docs = loader.load(raw_data)
 
     ids = []

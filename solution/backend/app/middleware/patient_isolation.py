@@ -52,7 +52,9 @@ def _extract_patient_id_from_jwt(token: str) -> str:
             raise ValueError("Invalid JWT format")
 
         payload = parts[1]
-        payload += "=" * (4 - len(payload) % 4)
+        padding = 4 - len(payload) % 4
+        if padding != 4:
+            payload += "=" * padding
         decoded = base64.urlsafe_b64decode(payload)
         claims = json.loads(decoded)
 
@@ -60,8 +62,7 @@ def _extract_patient_id_from_jwt(token: str) -> str:
         if not patient_id:
             patient_id = claims.get("sub")
             logger.warning(
-                "custom:patient_id not in JWT claims, falling back to sub: %s",
-                patient_id,
+                "custom:patient_id not in JWT claims, falling back to sub",
             )
 
         if not patient_id:

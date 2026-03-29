@@ -74,10 +74,12 @@ class FHIRLoader(BaseDataLoader):
 
     def _parse_condition(self, resource: dict) -> str:
         code = resource.get("code", {})
-        coding = code.get("coding", [{}])[0] if code.get("coding") else {}
+        codings = code.get("coding", [])
+        coding = codings[0] if codings else {}
         display = coding.get("display", code.get("text", "Unknown condition"))
         icd_code = coding.get("code", "")
-        status = resource.get("clinicalStatus", {}).get("coding", [{}])[0].get("code", "unknown")
+        clinical_codings = resource.get("clinicalStatus", {}).get("coding", [])
+        status = clinical_codings[0].get("code", "unknown") if clinical_codings else "unknown"
         severity = resource.get("severity", {}).get("text", "")
 
         parts = [f"FHIR Condition: {display}"]
@@ -90,7 +92,9 @@ class FHIRLoader(BaseDataLoader):
 
     def _parse_medication(self, resource: dict) -> str:
         med = resource.get("medicationCodeableConcept", {})
-        display = med.get("text", med.get("coding", [{}])[0].get("display", "Unknown"))
+        med_codings = med.get("coding", [])
+        fallback = med_codings[0].get("display", "Unknown") if med_codings else "Unknown"
+        display = med.get("text", fallback)
         status = resource.get("status", "unknown")
         return f"FHIR MedicationRequest: {display}. Status: {status}."
 

@@ -1,6 +1,7 @@
-# WAF Web ACL — rate limiting and basic protection
-# Note: HTTP API Gateway (v2) does not support WAF association directly.
-# WAF is deployed as a standalone ACL ready for CloudFront or REST API Gateway.
+# WAF Web ACL — rate limiting and basic protection (REGIONAL scope)
+# HTTP API Gateway (v2) does not support direct WAF association.
+# Production path: CloudFront distribution -> WAF -> API Gateway HTTP API
+# This ACL is deployed standalone, ready to attach when CloudFront is added.
 
 variable "environment" { type = string }
 variable "api_endpoint" { type = string }

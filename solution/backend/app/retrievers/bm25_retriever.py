@@ -75,7 +75,11 @@ class BM25Retriever:
         Local dev (ChromaDB): reads from vector DB directly.
         """
         # Production: use DynamoDB as the BM25 corpus store
-        if self._metadata_store and settings.vector_backend == "s3vectors":
+        if (
+            self._metadata_store is not None
+            and self._metadata_store.is_enabled
+            and settings.vector_backend == "s3vectors"
+        ):
             return self._load_from_dynamo(patient_id)
 
         # Local dev: use vector DB list (ChromaDB supports this natively)
@@ -86,24 +90,17 @@ class BM25Retriever:
 
     def _load_from_dynamo(self, patient_id: str) -> list[VectorSearchResult]:
         """Load patient corpus from DynamoDB patient-documents table."""
-        try:
-            items = self._metadata_store._docs_table.query(
-                KeyConditionExpression="patient_id = :pid",
-                ExpressionAttributeValues={":pid": patient_id},
-            ).get("Items", [])
-
-            return [
-                VectorSearchResult(
-                    id=item["chunk_id"],
-                    text=item.get("text_preview", ""),
-                    metadata={
-                        "patient_id": patient_id,
-                        "source_type": item.get("source_type", ""),
-                        "source_id": item.get("source_id", ""),
-                    },
-                    score=0.0,
-                )
-                for item in items
-            ]
-        except Exception:
-            return []
+        items = self._metadata_store.get_patient_documents(patient_id)
+        return [
+            VectorSearchResult(
+                id=item.get("chunk_id", ""),
+                text=item.get("text_preview", ""),
+                metadata={
+                    "patient_id": patient_id,
+                    "source_type": item.get("source_type", ""),
+                    "source_id": item.get("source_id", ""),
+                },
+                score=0.0,
+            )
+            for item in items
+        ]
