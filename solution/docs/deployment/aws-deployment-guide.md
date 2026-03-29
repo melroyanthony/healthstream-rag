@@ -12,7 +12,9 @@ The entire demo stack costs roughly **$3 USD** and can be torn down in one comma
 | AWS CLI | 2.x | [docs.aws.amazon.com/cli](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) |
 | Terraform | 1.7+ | [developer.hashicorp.com/terraform](https://developer.hashicorp.com/terraform/install) |
 | uv | 0.6+ | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
+| Python | 3.13 | `uv python install 3.13` |
 | Docker | 24+ | [docs.docker.com/get-docker](https://docs.docker.com/get-docker/) |
+| zip | any | Pre-installed on macOS/Linux (used by Lambda packaging) |
 
 Configure the AWS CLI before running anything:
 
@@ -100,12 +102,12 @@ using `aws lambda update-function-code`.
 make ingest-samples
 ```
 
-This runs `scripts/ingest_samples.py` against the locally configured vector store.
-For the AWS environment, set the correct environment variables first:
+`make ingest-samples` targets the local ChromaDB store. For AWS ingestion, set the environment variables to point at S3 Vectors and Bedrock:
 
 ```bash
 cd solution/backend
 VECTOR_BACKEND=s3vectors \
+EMBEDDER_BACKEND=bedrock \
 S3_VECTORS_BUCKET=<bucket-from-step-4> \
 AWS_REGION=eu-west-1 \
 MOCK_AUTH=true \
