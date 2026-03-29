@@ -14,7 +14,7 @@ workspace "HealthStream RAG" "HIPAA-compliant RAG chatbot for personal health da
         healthstream = softwareSystem "HealthStream RAG" "HIPAA-compliant AI chatbot for personal health data" {
             # API Layer
             apiGateway = container "API Gateway" "Request routing, rate limiting, auth" "AWS API Gateway + CloudFront + WAF" "AWS"
-            cognitoAuth = container "Cognito Auth" "JWT authentication with custom:patient_id claim" "Amazon Cognito" "AWS"
+            cognitoAuth = container "Cognito Auth" "JWT authentication (Phase 2: extract custom:patient_id claim)" "Amazon Cognito" "AWS"
 
             # Application Layer — Query (Phase 1: Implemented)
             queryOrchestrator = container "Query Orchestrator" "Hybrid retrieve, rerank, generate, cite" "FastAPI + Lambda (Python 3.13)" "Application" {

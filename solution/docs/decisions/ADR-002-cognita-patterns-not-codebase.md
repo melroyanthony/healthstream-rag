@@ -40,7 +40,7 @@ Adopt Cognita's architectural philosophy and interface contracts. Build AWS-nati
 
 1. **`get_patient_id()` dependency** (FastAPI `Depends()`) — mandatory `patient_id` extraction from Bearer token on every retrieval. Cognita has zero multi-tenancy or data isolation.
 2. **`redact_phi()` function** — regex patterns (dev) / Comprehend Medical (prod) entity detection before embedding. Cognita has no PII/PHI handling.
-3. **Guardrails pipeline** — PHI response check, denied topics, grounding, medical disclaimer. Cognita has no guardrails.
+3. **`apply_guardrails()` pipeline** — PHI response redaction, denied topic blocking, grounding check. Medical disclaimer appended by QueryController (not guardrails). Cognita has no guardrails.
 4. **Hybrid retrieval** — vector + BM25 with score normalization (Cognita only supports vector search)
 5. **Fail-fast on misconfiguration** — Bedrock backends raise RuntimeError instead of silent fallback
 

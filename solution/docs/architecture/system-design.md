@@ -109,7 +109,7 @@ healthstream_rag/
 │   └── factory.py
 │
 ├── guardrails/             # Post-generation checks
-│   └── pipeline.py         # PHI redaction + denied topics + grounding + disclaimer
+│   └── pipeline.py         # apply_guardrails(): PHI redaction + denied topics + grounding check
 │
 ├── models/                 # Pydantic models
 │   └── schemas.py          # All Pydantic models (Query, Health, Ingest, Collection)
