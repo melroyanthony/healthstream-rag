@@ -40,12 +40,13 @@ echo "==> Installing production dependencies with uv..."
 
 cd "${BACKEND_DIR}" && uv export --no-dev --no-hashes --frozen -o "${BUILD_DIR}/requirements.txt" 2>/dev/null \
   || uv pip compile "${BACKEND_DIR}/pyproject.toml" -o "${BUILD_DIR}/requirements.txt"
-# Use --platform to ensure arm64 Linux packages for Lambda runtime
+# Install deps — for cross-platform (macOS -> Lambda arm64 Linux),
+# consider building inside a Docker container matching the Lambda runtime:
+#   docker run --rm -v "$PWD:/build" public.ecr.aws/lambda/python:3.13 \
+#     pip install -t /build/deps -r /build/requirements.txt
 uv pip install \
   --python 3.13 \
   --target "${BUILD_DIR}" \
-  --platform manylinux2014_aarch64 \
-  --python-platform linux \
   -r "${BUILD_DIR}/requirements.txt"
 rm -f "${BUILD_DIR}/requirements.txt"
 
