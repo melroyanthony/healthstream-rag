@@ -91,8 +91,9 @@ module "compute" {
   lambda_timeout            = var.lambda_timeout
   private_subnet_ids        = module.networking.private_subnet_ids
   security_group_id         = module.networking.lambda_security_group_id
-  dynamodb_table_arn        = module.storage.dynamodb_table_arn
-  s3_bucket_arn             = module.storage.s3_bucket_arn
+  dynamodb_table_arn            = module.storage.dynamodb_table_arn
+  dynamodb_sessions_table_arn  = module.storage.dynamodb_sessions_table_arn
+  s3_bucket_arn                = module.storage.s3_bucket_arn
   kms_key_arn               = module.security.kms_key_arn
   cognito_user_pool_arn     = module.security.cognito_user_pool_arn
   cognito_client_id         = module.security.cognito_client_id

@@ -70,6 +70,8 @@ resource "aws_cognito_user_pool" "patients" {
     require_uppercase = true
   }
 
+  # Custom attribute — appears in JWT as "custom:patient_id"
+  # Backend must extract via claims["custom:patient_id"]
   schema {
     name                = "patient_id"
     attribute_data_type = "String"

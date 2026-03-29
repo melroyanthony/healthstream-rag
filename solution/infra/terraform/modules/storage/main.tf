@@ -145,5 +145,6 @@ resource "aws_dynamodb_table" "sessions" {
 }
 
 output "dynamodb_table_arn" { value = aws_dynamodb_table.patient_documents.arn }
+output "dynamodb_sessions_table_arn" { value = aws_dynamodb_table.sessions.arn }
 output "s3_bucket_arn" { value = aws_s3_bucket.documents.arn }
 output "s3_vectors_bucket_name" { value = var.vector_backend == "s3vectors" ? aws_s3_bucket.vectors[0].bucket : "" }

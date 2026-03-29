@@ -16,6 +16,8 @@ resource "aws_cloudtrail" "audit" {
   is_multi_region_trail      = false
   enable_log_file_validation = true
 
+  # Management events only — data events (S3 object, DynamoDB item)
+  # can be enabled per-resource when audit scope requires it
   event_selector {
     read_write_type           = "All"
     include_management_events = true

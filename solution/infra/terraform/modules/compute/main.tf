@@ -7,6 +7,7 @@ variable "lambda_timeout" { type = number }
 variable "private_subnet_ids" { type = list(string) }
 variable "security_group_id" { type = string }
 variable "dynamodb_table_arn" { type = string }
+variable "dynamodb_sessions_table_arn" { type = string }
 variable "s3_bucket_arn" { type = string }
 variable "kms_key_arn" { type = string }
 variable "cognito_user_pool_arn" { type = string }
@@ -76,6 +77,8 @@ resource "aws_iam_role_policy" "lambda_data_access" {
         Resource = [
           var.dynamodb_table_arn,
           "${var.dynamodb_table_arn}/index/*",
+          var.dynamodb_sessions_table_arn,
+          "${var.dynamodb_sessions_table_arn}/index/*",
         ]
       },
       {
