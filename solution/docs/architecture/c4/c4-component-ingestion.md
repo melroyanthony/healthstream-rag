@@ -2,9 +2,36 @@
 
 > How does health data flow from sources to the vector store?
 
+## Phase 1 (Implemented)
+
+Single generic ingestion endpoint with PHI redaction and embedding.
+
 ```mermaid
 C4Component
-    title Ingestion Pipeline - Component Diagram
+    title Ingestion Pipeline - Phase 1 (Implemented)
+
+    Container_Boundary(ingest, "Ingestion Pipeline (FastAPI + Lambda)") {
+        Component(ingest_api, "POST /api/v1/ingest", "FastAPI", "Accepts documents with text, source_type, source_id")
+        Component(phi_redactor, "redact_phi()", "Regex patterns (dev) / Comprehend Medical (prod)", "Redacts common PHI patterns: SSN, phone, MRN, DOB, prefixed names")
+        Component(embedder, "Embedder", "sentence-transformers (dev) / Titan V2 (prod)", "384-dim (dev) or 1024-dim (prod) embeddings")
+    }
+
+    Person(client, "API Client", "MyAir app or test script")
+    ContainerDb(vector_store, "Vector Store", "ChromaDB (dev) / S3 Vectors (prod)")
+
+    Rel(client, ingest_api, "POST documents with Bearer token", "HTTPS")
+    Rel(ingest_api, phi_redactor, "Raw text -> redacted text")
+    Rel(phi_redactor, embedder, "PHI-free text")
+    Rel(embedder, vector_store, "Embeddings + metadata (patient_id from Bearer token)")
+```
+
+## Phase 2 (Target Architecture)
+
+Dedicated loaders per data source with event-driven ingestion.
+
+```mermaid
+C4Component
+    title Ingestion Pipeline - Phase 2 (Target)
 
     Container_Boundary(ingest, "Ingestion Pipeline (Lambda + SQS)") {
         Component(hk_loader, "HealthKitLoader", "Kinesis + Lambda", "Real-time: sleep sessions, AHI, mask seal, myAir scores")
@@ -35,13 +62,15 @@ C4Component
     Rel(hk_loader, s3_raw, "Raw encrypted records")
 ```
 
-## HIPAA Data Flow Guarantee
+## HIPAA Data Flow Guarantee (Both Phases)
 
 ```
 Raw text with PHI
     |
     v
-PHIRedactionParser (Comprehend Medical)
+redact_phi()
+    Phase 1: Regex patterns (local dev) / Comprehend Medical (when EMBEDDER_BACKEND=bedrock)
+    Phase 2: Always Comprehend Medical
     - Names -> [REDACTED_NAME]
     - DOBs -> [REDACTED_DOB]
     - MRNs -> [REDACTED_MRN]
@@ -49,12 +78,11 @@ PHIRedactionParser (Comprehend Medical)
     |
     v
 ONLY redacted text reaches:
-    - SemanticChunker
     - Embedder
     - Vector Store
-    - BM25 Corpus (DynamoDB)
+    - BM25 Corpus
 
 Raw PHI stored ONLY in:
     - S3 (SSE-KMS encrypted, VPC-only access)
-    - HealthLake (HIPAA BAA-covered)
+    - HealthLake (HIPAA BAA-covered) [Phase 2]
 ```

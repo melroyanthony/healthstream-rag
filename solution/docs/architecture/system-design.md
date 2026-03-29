@@ -83,13 +83,11 @@ healthstream_rag/
 │   └── lambda_handler.py   # Mangum adapter
 │
 ├── core/                   # Base interfaces (Cognita-inspired)
-│   ├── base_vector_db.py   # 6 abstract methods
-│   ├── base_parser.py      # BaseParser interface
+│   ├── base_vector_db.py   # 9 abstract methods (6 from Cognita + 3 added: query, delete_documents, collection_count)
 │   ├── base_embedder.py    # BaseEmbedder interface
 │   ├── base_reranker.py    # BaseReranker interface
-│   ├── base_generator.py   # BaseGenerator interface
-│   ├── base_loader.py      # BaseDataLoader interface
-│   └── registry.py         # Component registry + decorators
+│   └── base_generator.py   # BaseGenerator interface
+│   # Phase 2: base_parser.py, base_loader.py, registry.py
 │
 ├── vector_db/              # Vector backend implementations
 │   ├── chroma_db.py        # ChromaDB (local dev)
@@ -111,15 +109,10 @@ healthstream_rag/
 │   └── factory.py
 │
 ├── guardrails/             # Post-generation checks
-│   ├── phi_guard.py
-│   ├── grounding_guard.py
-│   ├── disclaimer.py
-│   └── pipeline.py
+│   └── pipeline.py         # apply_guardrails(): PHI redaction + denied topics + grounding check
 │
 ├── models/                 # Pydantic models
-│   ├── query.py            # QueryRequest, QueryResponse
-│   ├── health.py           # HealthStatus
-│   └── document.py         # Document, Chunk, Citation
+│   └── schemas.py          # All Pydantic models (Query, Health, Ingest, Collection)
 │
 ├── config.py               # pydantic-settings configuration
 └── embedders/

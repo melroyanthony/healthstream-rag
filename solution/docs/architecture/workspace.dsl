@@ -14,28 +14,30 @@ workspace "HealthStream RAG" "HIPAA-compliant RAG chatbot for personal health da
         healthstream = softwareSystem "HealthStream RAG" "HIPAA-compliant AI chatbot for personal health data" {
             # API Layer
             apiGateway = container "API Gateway" "Request routing, rate limiting, auth" "AWS API Gateway + CloudFront + WAF" "AWS"
-            cognitoAuth = container "Cognito Auth" "JWT authentication with patient_id claim" "Amazon Cognito" "AWS"
+            cognitoAuth = container "Cognito Auth" "JWT authentication (Phase 2: extract custom:patient_id claim)" "Amazon Cognito" "AWS"
 
-            # Application Layer
+            # Application Layer — Query (Phase 1: Implemented)
             queryOrchestrator = container "Query Orchestrator" "Hybrid retrieve, rerank, generate, cite" "FastAPI + Lambda (Python 3.13)" "Application" {
                 queryController = component "QueryController" "Orchestrates the full RAG pipeline" "Python"
-                hybridRetriever = component "HybridRetriever" "Vector + BM25 merge + dedup" "Python"
-                vectorRetriever = component "VectorRetriever" "Semantic search via vector DB" "Python"
-                bm25Retriever = component "BM25Retriever" "Keyword search for medical terms" "Python (rank-bm25)"
-                reranker = component "CohereReranker" "Cross-encoder reranking top-5" "Bedrock Cohere"
-                generator = component "LLMGenerator" "Claude Haiku 4.5 generation" "Bedrock / Anthropic"
-                guardrails = component "Guardrails" "PHI check, grounding, disclaimer" "Bedrock Guardrails"
-                patientIsolation = component "PatientIsolationMiddleware" "Mandatory patient_id filter" "Python"
+                hybridRetriever = component "HybridRetriever" "Vector + BM25 merge + dedup + score normalization" "Python"
+                vectorRetriever = component "VectorRetriever" "Semantic search via BaseVectorDB interface" "Python"
+                bm25Retriever = component "BM25Retriever" "Keyword search for medical terms (ChromaDB only)" "Python (rank-bm25)"
+                reranker = component "SimpleReranker" "Query-document relevance scoring (Phase 2: Cohere Rerank)" "Python"
+                generator = component "LLMGenerator" "Claude Haiku 4.5 generation" "Bedrock (prod) / Anthropic (dev)"
+                guardrails = component "GuardrailsPipeline" "PHI check, denied topics, grounding, disclaimer" "Python"
+                patientIsolation = component "get_patient_id" "FastAPI Depends() — extracts patient_id from JWT Bearer token" "Python"
             }
 
-            # Ingestion Layer
-            ingestionPipeline = container "Ingestion Pipeline" "Parse, redact PHI, chunk, embed, store" "Lambda + SQS" "Application" {
-                healthkitLoader = component "HealthKitLoader" "Real-time health events" "Kinesis + Lambda"
-                fhirLoader = component "FHIRLoader" "FHIR R4 resources" "HealthLake + EventBridge"
-                ehrLoader = component "EHRLoader" "Legacy clinical records" "S3 + Lambda"
-                phiRedactor = component "PHIRedactionParser" "Comprehend Medical PHI removal" "AWS Comprehend"
-                chunker = component "SemanticChunker" "Medical clause-boundary chunking" "Python"
-                embedder = component "Embedder" "Titan V2 / sentence-transformers" "Bedrock / Local"
+            # Application Layer — Ingestion (Phase 1: Generic endpoint)
+            ingestionPipeline = container "Ingestion Pipeline" "Parse, redact PHI, embed, store" "FastAPI /api/v1/ingest" "Application" {
+                ingestEndpoint = component "IngestEndpoint" "Generic document ingestion API" "FastAPI"
+                phiRedactor = component "redact_phi()" "Regex patterns (dev) / Comprehend Medical (prod)" "Python / AWS Comprehend"
+                embedder = component "Embedder" "sentence-transformers (dev) / Titan V2 (prod)" "Python / Bedrock"
+                # Phase 2 components (not yet implemented):
+                # healthkitLoader = component "HealthKitLoader" "Real-time health events" "Kinesis + Lambda"
+                # fhirLoader = component "FHIRLoader" "FHIR R4 resources" "HealthLake + EventBridge"
+                # ehrLoader = component "EHRLoader" "Legacy clinical records" "S3 + Lambda"
+                # chunker = component "SemanticChunker" "Medical clause-boundary chunking" "Python"
             }
 
             # Data Layer
@@ -61,15 +63,15 @@ workspace "HealthStream RAG" "HIPAA-compliant RAG chatbot for personal health da
         apiGateway -> queryOrchestrator "Invoke with patient_id" "Lambda"
 
         queryOrchestrator -> vectorStore "query_vectors(embedding, patient_id, k=20)" "boto3 / chromadb"
-        queryOrchestrator -> dynamoDB "Get patient context + BM25 corpus" "boto3"
+        # Phase 2: queryOrchestrator -> dynamoDB "Get patient context + BM25 corpus" "boto3"
 
         ingestionPipeline -> vectorStore "upsert_documents(chunks, embeddings, metadata)" "boto3 / chromadb"
-        ingestionPipeline -> dynamoDB "Store chunks for BM25" "boto3"
         ingestionPipeline -> s3Storage "Store raw encrypted records" "boto3"
 
-        healthkit -> ingestionPipeline "Stream health events" "Kinesis"
-        fhirSources -> ingestionPipeline "FHIR R4 resources" "HealthLake EventBridge"
-        ehrSystems -> ingestionPipeline "Clinical records" "S3 PutObject"
+        # Phase 2: Event-driven ingestion from external sources
+        # healthkit -> ingestionPipeline "Stream health events" "Kinesis"
+        # fhirSources -> ingestionPipeline "FHIR R4 resources" "HealthLake EventBridge"
+        # ehrSystems -> ingestionPipeline "Clinical records" "S3 PutObject"
 
         vectorStore -> kms "Encrypt/decrypt" "KMS API"
         dynamoDB -> kms "Encrypt/decrypt" "KMS API"
