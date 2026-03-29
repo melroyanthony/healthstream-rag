@@ -4,7 +4,6 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-
 COLLECTION_NAME_PATTERN = r"^[a-z][a-z0-9_-]*$"
 
 

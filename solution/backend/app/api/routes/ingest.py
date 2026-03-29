@@ -5,9 +5,9 @@ import uuid
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies import get_embedder, get_vector_db
+from app.config import settings
 from app.core.base_embedder import BaseEmbedder
 from app.core.base_vector_db import BaseVectorDB
-from app.config import settings
 from app.middleware.patient_isolation import get_patient_id
 from app.middleware.phi_redaction import redact_phi
 from app.models.schemas import IngestRequest, IngestResponse
