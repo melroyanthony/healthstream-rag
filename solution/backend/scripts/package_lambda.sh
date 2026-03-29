@@ -23,6 +23,10 @@ BACKEND_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 OUTPUT_ZIP="${BACKEND_DIR}/lambda-package.zip"
 BUILD_DIR="$(mktemp -d)"
 
+# Cleanup on exit (even on failure)
+cleanup() { rm -rf "${BUILD_DIR}"; }
+trap cleanup EXIT
+
 echo "==> HealthStream RAG — Lambda packager"
 echo "    backend : ${BACKEND_DIR}"
 echo "    build   : ${BUILD_DIR}"
@@ -34,11 +38,13 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "==> Installing production dependencies with uv..."
 
+uv export --no-dev --no-hashes --frozen -o "${BUILD_DIR}/requirements.txt" 2>/dev/null \
+  || uv pip compile "${BACKEND_DIR}/pyproject.toml" --no-deps -o "${BUILD_DIR}/requirements.txt"
 uv pip install \
   --python python3.13 \
   --target "${BUILD_DIR}" \
-  --no-dev \
-  "${BACKEND_DIR}"
+  -r "${BUILD_DIR}/requirements.txt"
+rm -f "${BUILD_DIR}/requirements.txt"
 
 echo "    Done."
 
@@ -71,10 +77,7 @@ rm -f "${OUTPUT_ZIP}"
 ZIP_SIZE_MB=$(du -sm "${OUTPUT_ZIP}" | cut -f1)
 echo "    Package size: ${ZIP_SIZE_MB} MB"
 
-# ---------------------------------------------------------------------------
-# Step 5: Clean up
-# ---------------------------------------------------------------------------
-rm -rf "${BUILD_DIR}"
+# Cleanup handled by EXIT trap
 echo ""
 echo "==> lambda-package.zip is ready at: ${OUTPUT_ZIP}"
 echo "    Deploy with:"

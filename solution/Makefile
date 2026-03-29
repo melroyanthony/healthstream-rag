@@ -1,6 +1,8 @@
 # HealthStream RAG — Developer & Deployment Makefile
 # Region: eu-west-1 | Runtime: Python 3.13 | Package manager: uv
 #
+# Run from: solution/ directory (where this Makefile lives)
+#
 # Usage:
 #   make dev            Start local dev server (port 8000)
 #   make test           Run the test suite with mock auth
@@ -11,8 +13,8 @@
 #   make ingest-samples Ingest sample data into the vector store
 #   make eval           Run the RAG evaluation script
 
-BACKEND_DIR := solution/backend
-INFRA_DIR   := solution/infra/terraform
+BACKEND_DIR := backend
+INFRA_DIR   := infra/terraform
 AWS_REGION  := eu-west-1
 LAMBDA_FUNC := healthstream-demo-query
 
@@ -40,11 +42,11 @@ lint:
 
 ## Build images and start all services in detached mode
 docker-up:
-	cd solution && docker compose up --build -d
+	docker compose up --build -d
 
 ## Stop and remove all Docker Compose containers
 docker-down:
-	cd solution && docker compose down
+	docker compose down
 
 # ---------------------------------------------------------------------------
 # AWS deployment

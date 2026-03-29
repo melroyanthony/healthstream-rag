@@ -79,9 +79,10 @@ Save these values; you will need the `api_endpoint` later.
 
 ### 5. Package and deploy the Lambda
 
-From the repository root:
+From the `solution/` directory:
 
 ```bash
+cd solution
 make deploy-lambda
 ```
 
@@ -217,7 +218,8 @@ If you see `UnknownServiceError`, upgrade the AWS CLI:
 
 ```bash
 aws --version   # must be >= 2.22
-pip install --upgrade awscli
+# Install/upgrade AWS CLI v2: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+# Do NOT use `pip install awscli` — that installs v1
 ```
 
 ### `make deploy-lambda` zip is too large (> 50 MB)
