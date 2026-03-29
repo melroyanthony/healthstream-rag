@@ -400,20 +400,21 @@ def main() -> None:
     print("\n[3/5] Spinning up FastAPI test client + ingesting data ...")
     with tempfile.TemporaryDirectory() as chroma_dir:
         os.environ["CHROMA_PERSIST_DIRECTORY"] = chroma_dir
-        client, _db, _embedder = _build_test_client(chroma_dir)
+        test_client, _db, _embedder = _build_test_client(chroma_dir)
 
-        _ingest_sample_data(client, sample_data, patient_id="synthetic-patient-001")
-        doc_count = len(sample_data["patients"]["synthetic-patient-001"]["documents"])
-        print(f"      {doc_count} documents ingested for synthetic-patient-001")
+        with test_client as client:
+            _ingest_sample_data(client, sample_data, patient_id="synthetic-patient-001")
+            doc_count = len(sample_data["patients"]["synthetic-patient-001"]["documents"])
+            print(f"      {doc_count} documents ingested for synthetic-patient-001")
 
-        print("\n[4/5] Running patient isolation check ...")
-        isolation_ok = run_patient_isolation_check(client)
-        status = "PASS" if isolation_ok else "FAIL"
-        print(f"      Patient isolation: {status}")
+            print("\n[4/5] Running patient isolation check ...")
+            isolation_ok = run_patient_isolation_check(client)
+            status = "PASS" if isolation_ok else "FAIL"
+            print(f"      Patient isolation: {status}")
 
-        print("\n[5/5] Running golden Q&A evaluations ...")
-        results = run_golden_evaluations(client, golden_items)
-        print(f"      {len(results)} evaluations completed")
+            print("\n[5/5] Running golden Q&A evaluations ...")
+            results = run_golden_evaluations(client, golden_items)
+            print(f"      {len(results)} evaluations completed")
 
     print_results_table(results)
     print_summary(results, isolation_ok)
