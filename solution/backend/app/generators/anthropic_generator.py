@@ -31,7 +31,7 @@ class AnthropicGenerator(BaseGenerator):
     Zero AWS cost -- uses Anthropic API key directly.
     """
 
-    def __init__(self, api_key: str, model: str = "claude-haiku-4-5-20250315") -> None:
+    def __init__(self, api_key: str, model: str = "claude-haiku-4-5-20251001") -> None:
         self._model = model
         self._api_key = api_key
         self._client = None

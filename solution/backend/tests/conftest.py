@@ -50,7 +50,7 @@ def client(chroma_dir, embedder):
     get_query_controller.cache_clear()
 
     _db = ChromaVectorDB(persist_directory=chroma_dir)
-    _gen = AnthropicGenerator(api_key="", model="claude-haiku-4-5-20250315")
+    _gen = AnthropicGenerator(api_key="", model="claude-haiku-4-5-20251001")
     _controller = QueryController(vector_db=_db, embedder=embedder, generator=_gen)
 
     app = create_app()

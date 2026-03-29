@@ -180,7 +180,7 @@ def _build_test_client(chroma_dir: str):
     db = ChromaVectorDB(persist_directory=chroma_dir)
     embedder = LocalEmbedder()
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-    generator = AnthropicGenerator(api_key=api_key, model="claude-haiku-4-5-20250315")
+    generator = AnthropicGenerator(api_key=api_key, model="claude-haiku-4-5-20251001")
     controller = QueryController(vector_db=db, embedder=embedder, generator=generator)
 
     app = create_app()
