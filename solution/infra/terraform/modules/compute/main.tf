@@ -91,12 +91,17 @@ resource "aws_iam_role_policy" "lambda_data_access" {
         Sid    = "S3VectorsAccess"
         Effect = "Allow"
         Action = [
-          "s3vectors:QueryVectors",
+          "s3vectors:CreateVectorBucket",
+          "s3vectors:GetVectorBucket",
+          "s3vectors:CreateIndex",
+          "s3vectors:GetIndex",
+          "s3vectors:ListIndexes",
+          "s3vectors:DeleteIndex",
           "s3vectors:PutVectors",
+          "s3vectors:QueryVectors",
           "s3vectors:DeleteVectors",
-          "s3vectors:CreateVectorIndex",
-          "s3vectors:DescribeVectorIndex",
-          "s3vectors:ListVectorIndexes",
+          "s3vectors:GetVectors",
+          "s3vectors:ListVectors",
         ]
         # S3 Vectors (GA Dec 2025) uses bucket-level ARNs but vector index
         # operations require wildcard — no index-level ARN scoping available yet
