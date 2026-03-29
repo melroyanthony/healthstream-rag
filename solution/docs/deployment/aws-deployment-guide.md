@@ -129,14 +129,23 @@ aws lambda invoke \
 Or hit the API Gateway endpoint directly (replace with your endpoint):
 
 ```bash
+# /health is excluded from JWT auth in the API Gateway route config
 curl -s https://<id>.execute-api.eu-west-1.amazonaws.com/health | python3 -m json.tool
 ```
 
 Expected response:
 
 ```json
-{"status": "ok"}
+{
+  "status": "healthy",
+  "version": "1.0.0",
+  "vector_backend": "s3vectors",
+  "dependencies": {"vector_store": "ok", "llm": "ok", "embedder": "ok"}
+}
 ```
+
+> **Note:** If /health returns 401, the API Gateway JWT authorizer may be applied to all routes.
+> Add a route exclusion for `/health` in Terraform or use `curl -H "Authorization: Bearer <token>"` to test.
 
 ---
 
@@ -226,7 +235,10 @@ aws --version   # must be >= 2.22
 
 ### `make deploy-lambda` zip is too large (> 50 MB)
 
-The Lambda direct-upload limit is 50 MB. Upload via S3 instead:
+Lambda limits: 50 MB direct upload, 250 MB unzipped. If your package exceeds either:
+- Exclude local-only deps (`sentence-transformers`, `torch`) — production uses Bedrock embeddings
+- Or use a Lambda layer for large deps
+- Upload via S3 for the 50 MB limit:
 
 ```bash
 aws s3 cp solution/backend/lambda-package.zip s3://<deployment-bucket>/lambda-package.zip
