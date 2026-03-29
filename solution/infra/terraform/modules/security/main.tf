@@ -146,4 +146,5 @@ output "kms_key_arn" { value = aws_kms_key.healthstream.arn }
 output "cognito_user_pool_id" { value = aws_cognito_user_pool.patients.id }
 output "cognito_user_pool_arn" { value = aws_cognito_user_pool.patients.arn }
 output "lambda_execution_role_arn" { value = aws_iam_role.lambda_execution.arn }
+output "lambda_execution_role_name" { value = aws_iam_role.lambda_execution.name }
 output "cognito_client_id" { value = aws_cognito_user_pool_client.app.id }

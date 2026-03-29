@@ -38,11 +38,35 @@ resource "aws_security_group" "lambda" {
   }
 
   egress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    self        = true
+    description = "HTTPS to interface VPC endpoints"
+  }
+
+  egress {
     from_port       = 443
     to_port         = 443
     protocol        = "tcp"
-    self            = true
-    description     = "HTTPS to VPC endpoints only (defense-in-depth)"
+    prefix_list_ids = [aws_vpc_endpoint.s3.prefix_list_id, aws_vpc_endpoint.dynamodb.prefix_list_id]
+    description     = "HTTPS to S3/DynamoDB gateway endpoints via prefix lists"
+  }
+
+  egress {
+    from_port   = 53
+    to_port     = 53
+    protocol    = "udp"
+    cidr_blocks = [aws_vpc.main.cidr_block]
+    description = "DNS resolution via VPC resolver"
+  }
+
+  egress {
+    from_port   = 53
+    to_port     = 53
+    protocol    = "tcp"
+    cidr_blocks = [aws_vpc.main.cidr_block]
+    description = "DNS resolution via VPC resolver (TCP)"
   }
 
   tags = { Name = "healthstream-lambda-sg" }
@@ -88,6 +112,28 @@ resource "aws_vpc_endpoint" "comprehend_medical" {
   private_dns_enabled = true
 
   tags = { Name = "healthstream-comprehend-endpoint" }
+}
+
+resource "aws_vpc_endpoint" "logs" {
+  vpc_id              = aws_vpc.main.id
+  service_name        = "com.amazonaws.${var.aws_region}.logs"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = aws_subnet.private[*].id
+  security_group_ids  = [aws_security_group.lambda.id]
+  private_dns_enabled = true
+
+  tags = { Name = "healthstream-logs-endpoint" }
+}
+
+resource "aws_vpc_endpoint" "s3vectors" {
+  vpc_id              = aws_vpc.main.id
+  service_name        = "com.amazonaws.${var.aws_region}.s3vectors"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = aws_subnet.private[*].id
+  security_group_ids  = [aws_security_group.lambda.id]
+  private_dns_enabled = true
+
+  tags = { Name = "healthstream-s3vectors-endpoint" }
 }
 
 output "vpc_id" { value = aws_vpc.main.id }

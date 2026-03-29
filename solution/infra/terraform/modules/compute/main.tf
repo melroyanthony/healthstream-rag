@@ -12,6 +12,7 @@ variable "kms_key_arn" { type = string }
 variable "cognito_user_pool_arn" { type = string }
 variable "cognito_client_id" { type = string }
 variable "lambda_execution_role_arn" { type = string }
+variable "lambda_execution_role_name" { type = string }
 variable "vector_backend" { type = string }
 variable "s3_vectors_bucket_name" { type = string }
 
@@ -53,7 +54,7 @@ resource "aws_lambda_function" "query" {
 # IAM policy for Lambda to access DynamoDB and S3
 resource "aws_iam_role_policy" "lambda_data_access" {
   name = "healthstream-${var.environment}-data-access"
-  role = split("/", var.lambda_execution_role_arn)[1]
+  role = var.lambda_execution_role_name
 
   policy = jsonencode({
     Version = "2012-10-17"

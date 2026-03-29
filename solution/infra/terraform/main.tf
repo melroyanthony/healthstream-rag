@@ -96,7 +96,8 @@ module "compute" {
   kms_key_arn               = module.security.kms_key_arn
   cognito_user_pool_arn     = module.security.cognito_user_pool_arn
   cognito_client_id         = module.security.cognito_client_id
-  lambda_execution_role_arn = module.security.lambda_execution_role_arn
+  lambda_execution_role_arn  = module.security.lambda_execution_role_arn
+  lambda_execution_role_name = module.security.lambda_execution_role_name
   vector_backend            = var.vector_backend
   s3_vectors_bucket_name    = module.storage.s3_vectors_bucket_name
 }
