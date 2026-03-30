@@ -267,7 +267,7 @@ terraform apply healthstream.plan
 | Authentication | Mock (Bearer token = patient_id) | Cognito JWT (custom:patient_id) | Done |
 | Data Loaders | Generic /api/v1/ingest endpoint | HealthKit/FHIR/EHR dedicated loaders | Phase 2 |
 | Infrastructure | Docker Compose (`--target local`) | Lambda (`--target lambda`) + Terraform (6 modules) | Done |
-| Packaging | Single Dockerfile, uv dependency groups | Same Dockerfile, `uv export --no-group local` | Done |
+| Packaging | Single Dockerfile, uv dependency groups | Same Dockerfile, `uv export --no-group local --no-group dev --no-hashes` | Done |
 
 ## Testing
 

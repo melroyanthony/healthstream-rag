@@ -6,7 +6,7 @@
 
 * unify config, Dockerfile, and deps for single codebase (#28)
   - Multi-stage Dockerfile: `--target local` / `--target lambda`
-  - Dependency groups: core + `local` (chromadb, sentence-transformers) + `dev`
+  - Dependencies: default (core) set + optional groups `local` (chromadb, sentence-transformers) and `dev`
   - Env profiles: `.env.local` + `.env.aws.example`
   - Removed `Dockerfile.lambda` and `requirements-lambda.txt`
   - Added `make demo-reset` and `make demo-teardown` targets

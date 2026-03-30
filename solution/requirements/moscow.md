@@ -13,7 +13,7 @@
 - [x] Hybrid retriever (vector + BM25 merge + dedup)
 - [x] Simple reranker (token overlap scoring)
 - [x] LLM generator (Bedrock Haiku 4.5 + Anthropic direct fallback)
-- [x] Guardrails pipeline (PHI check, disclaimer, grounding)
+- [x] Guardrails pipeline (PHI redaction, denied-topic checks, grounding; disclaimer appended in API response layer)
 - [x] Docker Compose (FastAPI + ChromaDB)
 - [x] Pydantic request/response models at API boundaries
 - [x] Unit tests (34 tests, HIPAA control verification)
@@ -30,7 +30,7 @@
 - [x] Structured logging (structlog)
 - [x] Patient isolation integration test
 - [x] Unified Dockerfile (multi-stage: local + lambda targets)
-- [x] Dependency groups (core + local + dev)
+- [x] Default deps + dependency groups (local + dev)
 - [x] Env profiles (.env.local + .env.aws.example)
 - [ ] Registry-based polymorphism (decorator self-registration) — using factory functions instead
 - [ ] DynamoDB corpus backend for BM25 on S3 Vectors path

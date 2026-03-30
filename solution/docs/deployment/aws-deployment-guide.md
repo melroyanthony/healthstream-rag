@@ -89,7 +89,7 @@ make deploy-lambda
 ```
 
 This builds the Lambda container using the unified multi-stage Dockerfile:
-1. `docker build --target lambda` — installs production-only deps via `uv export --no-group local`
+1. `docker build --target lambda` — installs production-only deps via `uv export --no-group local --no-group dev --no-hashes` then `pip install`
 2. Pushes the arm64 container image to ECR
 3. Updates the Lambda function code to point at the new image
 
