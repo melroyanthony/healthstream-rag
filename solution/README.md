@@ -243,12 +243,18 @@ cp backend/.env.aws.example backend/.env  # AWS production
 > **Note:** Terraform provisions infrastructure scaffolding. The Lambda deploys with a placeholder artifact — `make deploy` builds the container (`--target lambda`), pushes to ECR, and updates the function.
 
 ```bash
-cd solution/infra/terraform
+cd solution
+
+# Option A: Makefile (recommended — passes ecr_image_uri automatically)
+make terraform-apply
+
+# Option B: Manual terraform
+cd infra/terraform
 terraform init
-terraform plan -out=healthstream.plan
+terraform plan -var="ecr_image_uri=<ACCOUNT>.dkr.ecr.eu-west-1.amazonaws.com/healthstream-rag" -out=healthstream.plan
 terraform apply healthstream.plan
 
-# After infra is up, deploy the Lambda artifact:
+# After infra is up, build + push + deploy Lambda:
 # cd solution && make deploy
 ```
 
