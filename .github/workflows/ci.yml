@@ -47,10 +47,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build backend Docker image
+      - name: Build backend Docker image (local target)
         run: |
           cd solution/backend
-          docker build -t healthstream-rag:test .
+          docker build --target local -t healthstream-rag:test .
 
       - name: Verify Docker image
         run: |

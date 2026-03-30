@@ -14,6 +14,8 @@
 #   make ingest-samples  Ingest sample data into the vector store
 #   make eval            Run the RAG evaluation script
 #   make demo            Run the full AWS demo script
+#   make demo-reset      Clean all data then re-run demo (fresh start)
+#   make demo-teardown   Clean all data and exit
 
 BACKEND_DIR := backend
 INFRA_DIR   := infra/terraform
@@ -24,7 +26,7 @@ ECR_REPO     := $(ECR_REGISTRY)/healthstream-rag
 LAMBDA_FUNC  := healthstream-demo-query
 VERSION     := $(shell date +%Y%m%d-%H%M%S)
 
-.PHONY: dev test lint docker-up docker-down deploy ecr-login ecr-cleanup ingest-samples eval demo terraform-apply
+.PHONY: dev test lint docker-up docker-down deploy ecr-login ecr-cleanup ingest-samples eval demo demo-reset demo-teardown terraform-apply
 
 # ---------------------------------------------------------------------------
 # Local development
@@ -61,7 +63,7 @@ ecr-login:
 deploy: ecr-login
 	@echo "==> Building Lambda container ($(VERSION))..."
 	docker build --platform linux/arm64 --provenance=false --no-cache \
-		-f $(BACKEND_DIR)/Dockerfile.lambda \
+		--target lambda \
 		-t healthstream-rag-lambda:$(VERSION) \
 		$(BACKEND_DIR)
 	@echo "==> Pushing to ECR..."
@@ -108,5 +110,14 @@ ingest-samples:
 eval:
 	cd $(BACKEND_DIR) && MOCK_AUTH=true uv run python scripts/evaluate.py
 
+## Run the full AWS demo (idempotent — safe to run repeatedly)
 demo:
 	cd $(BACKEND_DIR) && bash scripts/aws_demo.sh
+
+## Clean all demo data (users + vectors + DynamoDB) then re-run demo
+demo-reset:
+	cd $(BACKEND_DIR) && bash scripts/aws_demo.sh reset
+
+## Clean all demo data and exit (no re-run)
+demo-teardown:
+	cd $(BACKEND_DIR) && bash scripts/aws_demo.sh teardown
