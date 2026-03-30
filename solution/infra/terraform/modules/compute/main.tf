@@ -17,6 +17,7 @@ variable "lambda_execution_role_name" { type = string }
 variable "vector_backend" { type = string }
 variable "s3_vectors_bucket_name" { type = string }
 variable "ecr_image_uri" { type = string }
+variable "allowed_origins" { type = list(string) }
 
 # Lambda log group — explicit with KMS encryption and retention
 resource "aws_cloudwatch_log_group" "lambda_query" {
@@ -132,7 +133,7 @@ resource "aws_apigatewayv2_api" "main" {
   cors_configuration {
     allow_headers = ["Content-Type", "Authorization"]
     allow_methods = ["GET", "POST", "DELETE", "OPTIONS"]
-    allow_origins = ["https://myair.resmed.com"]
+    allow_origins = var.allowed_origins
     max_age       = 3600
   }
 

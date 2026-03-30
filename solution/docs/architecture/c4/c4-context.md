@@ -24,7 +24,7 @@ C4Context
 
 ## Key Decisions
 
-- **Patients** interact via the MyAir mobile app (existing ResMed product)
-- **Clinicians** access via AirView (existing ResMed platform)
+- **Patients** interact via a mobile health app (e.g. companion CPAP app)
+- **Clinicians** access via a patient management portal
 - **Three data source types** each with a dedicated ingestion pipeline
 - All interactions go through HIPAA controls (encryption, audit, patient isolation)

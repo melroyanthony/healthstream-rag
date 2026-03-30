@@ -14,7 +14,7 @@
 
 ## Project Context
 - **Domain**: Healthcare AI - HIPAA-compliant RAG chatbot
-- **Client**: ResMed Lead Software Engineer AI assessment
+- **Domain**: Healthcare AI — HIPAA-compliant RAG
 - **Scale**: 10M+ daily active users
 - **Stack**: FastAPI + AWS (S3 Vectors, DynamoDB, Bedrock, Lambda)
 - **Key differentiators**: Patient isolation, PHI redaction, hybrid retrieval, Cognita-inspired modular design

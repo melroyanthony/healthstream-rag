@@ -2,7 +2,7 @@
 
 ## Problem Summary
 
-Build a **HIPAA-compliant, AWS-native RAG (Retrieval-Augmented Generation) chatbot** for ResMed's patient-facing MyAir application. The system serves 10M+ daily active users querying personal health data across Apple HealthKit, Google Health Connect, FHIR R4, and legacy EHR systems. The architecture uses Amazon S3 Vectors (GA Dec 2025) as the primary vector store with a pluggable backend pattern inspired by Cognita's modular design.
+Build a **HIPAA-compliant, AWS-native RAG (Retrieval-Augmented Generation) chatbot** for a patient-facing health companion app. The system serves 10M+ daily active users querying personal health data across Apple HealthKit, Google Health Connect, FHIR R4, and legacy EHR systems. The architecture uses Amazon S3 Vectors (GA Dec 2025) as the primary vector store with a pluggable backend pattern inspired by Cognita's modular design.
 
 **Primary deliverable**: Working implementation demonstrating the architecture is production-viable within a ~$2.76 AWS demo budget.
 

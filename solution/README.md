@@ -1,6 +1,6 @@
 # HealthStream RAG
 
-HIPAA-compliant RAG chatbot for personal health data. Built as a ResMed Lead Software Engineer AI assessment submission.
+HIPAA-compliant RAG chatbot for personal health data. Modular, open-source, AWS-native.
 
 ## Architecture
 

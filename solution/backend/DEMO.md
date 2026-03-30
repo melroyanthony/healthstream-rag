@@ -8,8 +8,8 @@ cd solution/backend
 # 1. Start server
 uv run uvicorn app.api.main:app --reload --port 8000
 
-# 2. Run the full demo (ingests data + runs queries)
-bash scripts/demo.sh
+# 2. Ingest sample data
+MOCK_AUTH=true uv run python scripts/ingest_samples.py
 ```
 
 ## Manual Queries

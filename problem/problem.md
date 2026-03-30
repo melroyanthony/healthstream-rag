@@ -13,7 +13,7 @@
 
 A production-grade, HIPAA-compliant RAG (Retrieval-Augmented Generation) chatbot architecture on AWS — designed for **10 million+ daily users** querying personal health data across Apple HealthKit, Google Health Connect, FHIR R4, and legacy EHR systems.
 
-Built as a **ResMed Lead Software Engineer AI take-home assessment** submission. The primary deliverable is the architectural design. The working implementation demonstrates the architecture is production-viable within a **~$2.76 AWS demo budget** (Claude Haiku 4.5 pricing, March 2026).
+The primary deliverable is the architectural design. The working implementation demonstrates the architecture is production-viable within a **~$2.76 AWS demo budget** (Claude Haiku 4.5 pricing, March 2026).
 
 ### Two Vector Backend Implementations
 
@@ -920,7 +920,7 @@ Key commands used:
 /create-pr
 ```
 
-This demonstrates the exact AI-augmented development workflow that would be brought to the ResMed engineering team — documented, reproducible, and auditable.
+This demonstrates an AI-augmented development workflow — documented, reproducible, and auditable.
 
 ---
 
@@ -1004,7 +1004,7 @@ healthstream-rag/
 AI Architect & Lead Software Engineer | Dublin, Ireland
 [themelroyanthony@gmail.com](mailto:themelroyanthony@gmail.com) | [LinkedIn](https://www.linkedin.com/in/melroyanthony)
 
-Built for the ResMed Lead Software Engineer AI take-home assessment. Architecture designed for patient impact — not dashboards.
+Architecture designed for patient impact — not dashboards.
 
 ---
 
