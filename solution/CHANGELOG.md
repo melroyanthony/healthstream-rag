@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.3](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.5.3) (2026-03-30)
+
+### Bug Fixes
+
+* deduplicate citations, lower grounding threshold, repeatable deploy (#26)
+
 ## [1.5.2](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.5.2) (2026-03-29)
 
 ### Miscellaneous
