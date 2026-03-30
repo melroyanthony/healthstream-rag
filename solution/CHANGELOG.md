@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.4](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.5.4) (2026-03-30)
+
+### Refactoring
+
+* open-source readiness — remove vendor refs, add governance (#27)
+
 ## [1.5.3](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.5.3) (2026-03-30)
 
 ### Bug Fixes
