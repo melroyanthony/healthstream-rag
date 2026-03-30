@@ -12,7 +12,7 @@ class HybridRetriever:
     Steps:
     1. Vector search: top-K semantically similar (patient-filtered)
     2. BM25 search: top-K keyword matches (patient-filtered)
-    3. Merge + deduplicate by document ID
+    3. Merge + deduplicate by source_id (same doc from vector + BM25)
     4. Return combined unique results
     """
 
@@ -70,7 +70,7 @@ class HybridRetriever:
         vector_results: list[VectorSearchResult],
         bm25_results: list[VectorSearchResult],
     ) -> list[VectorSearchResult]:
-        """Merge results, deduplicate by ID, keep highest normalized score."""
+        """Merge results, deduplicate by source_id, keep highest normalized score."""
         vector_results = self._normalize_scores(vector_results)
         bm25_results = self._normalize_scores(bm25_results)
 

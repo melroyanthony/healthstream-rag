@@ -18,9 +18,10 @@
 BACKEND_DIR := backend
 INFRA_DIR   := infra/terraform
 AWS_REGION  := eu-west-1
-AWS_ACCOUNT := $(shell aws sts get-caller-identity --query Account --output text 2>/dev/null)
-ECR_REPO    := $(AWS_ACCOUNT).dkr.ecr.$(AWS_REGION).amazonaws.com/healthstream-rag
-LAMBDA_FUNC := healthstream-demo-query
+AWS_ACCOUNT  := $(shell aws sts get-caller-identity --query Account --output text 2>/dev/null)
+ECR_REGISTRY := $(if $(AWS_ACCOUNT),$(AWS_ACCOUNT).dkr.ecr.$(AWS_REGION).amazonaws.com,$(error AWS_ACCOUNT is empty — AWS credentials not configured. Run 'aws configure' first))
+ECR_REPO     := $(ECR_REGISTRY)/healthstream-rag
+LAMBDA_FUNC  := healthstream-demo-query
 VERSION     := $(shell date +%Y%m%d-%H%M%S)
 
 .PHONY: dev test lint docker-up docker-down deploy ecr-login ecr-cleanup ingest-samples eval demo terraform-apply
@@ -54,7 +55,7 @@ docker-down:
 
 ecr-login:
 	@aws ecr get-login-password --region $(AWS_REGION) | \
-		docker login --username AWS --password-stdin $(ECR_REPO) 2>/dev/null
+		docker login --username AWS --password-stdin $(ECR_REGISTRY) 2>/dev/null
 
 ## Full deploy: build container → push to ECR → update Lambda
 deploy: ecr-login

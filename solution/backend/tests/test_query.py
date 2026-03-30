@@ -68,6 +68,35 @@ def test_query_includes_metadata(client):
     assert "latency_ms" in data["metadata"]
 
 
+def test_query_deduplicates_citations_by_source_id(client):
+    """Should return each source_id at most once even when ingested multiple times."""
+    for _ in range(2):
+        client.post(
+            "/api/v1/ingest",
+            headers=AUTH,
+            json={
+                "documents": [
+                    {
+                        "text": "Sleep session: myAir score 88, AHI 2.1",
+                        "source_type": "healthkit",
+                        "source_id": "dup-session-001",
+                    },
+                ],
+            },
+        )
+
+    response = client.post(
+        "/api/v1/query",
+        headers=AUTH,
+        json={"question": "What was my sleep score?"},
+    )
+    data = response.json()
+    source_ids = [c["source_id"] for c in data["citations"]]
+    assert len(source_ids) == len(set(source_ids)), (
+        f"Duplicate source_ids in citations: {source_ids}"
+    )
+
+
 def test_query_respects_patient_isolation(client):
     """Should only return data for the authenticated patient."""
     client.post(
