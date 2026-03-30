@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.5](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.5.5) (2026-03-30)
+
+### Refactoring
+
+* unify config, Dockerfile, and deps for single codebase (#28)
+
 ## [1.5.4](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.5.4) (2026-03-30)
 
 ### Refactoring
