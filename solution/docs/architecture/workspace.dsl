@@ -2,8 +2,8 @@ workspace "HealthStream RAG" "HIPAA-compliant RAG chatbot for personal health da
 
     model {
         # People
-        patient = person "Patient" "MyAir app user with CPAP device" "Patient"
-        clinician = person "Clinician" "Care provider using AirView" "Clinician"
+        patient = person "Patient" "Health app user with CPAP device" "Patient"
+        clinician = person "Clinician" "Care provider using patient management portal" "Clinician"
 
         # External Systems
         healthkit = softwareSystem "Apple HealthKit / Google Health Connect" "Wearable health data" "External"

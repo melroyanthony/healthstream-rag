@@ -16,7 +16,7 @@ C4Component
         Component(embedder, "Embedder", "sentence-transformers (dev) / Titan V2 (prod)", "384-dim (dev) or 1024-dim (prod) embeddings")
     }
 
-    Person(client, "API Client", "MyAir app or test script")
+    Person(client, "API Client", "Health app or test script")
     ContainerDb(vector_store, "Vector Store", "ChromaDB (dev) / S3 Vectors (prod)")
 
     Rel(client, ingest_api, "POST documents with Bearer token", "HTTPS")
@@ -34,7 +34,7 @@ C4Component
     title Ingestion Pipeline - Phase 2 (Target)
 
     Container_Boundary(ingest, "Ingestion Pipeline (Lambda + SQS)") {
-        Component(hk_loader, "HealthKitLoader", "Kinesis + Lambda", "Real-time: sleep sessions, AHI, mask seal, myAir scores")
+        Component(hk_loader, "HealthKitLoader", "Kinesis + Lambda", "Real-time: sleep sessions, AHI, mask seal, sleep scores")
         Component(fhir_loader, "FHIRLoader", "HealthLake + EventBridge", "Event-driven: Patient, Observation, Condition, MedicationRequest")
         Component(ehr_loader, "EHRLoader", "S3 + Lambda", "Batch: HL7v2 -> FHIR R4 normalization, CCD/CCDA parsing")
         Component(phi_redactor, "PHIRedactionParser", "AWS Comprehend Medical", "MANDATORY: Names, DOBs, MRNs, SSNs -> [REDACTED_*]")

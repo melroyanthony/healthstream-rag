@@ -6,8 +6,8 @@
 C4Context
     title HealthStream RAG - System Context
 
-    Person(patient, "Patient", "MyAir app user on iPhone/Android with CPAP device")
-    Person(clinician, "Clinician", "Care provider using AirView patient management")
+    Person(patient, "Patient", "Health app user on iPhone/Android with CPAP device")
+    Person(clinician, "Clinician", "Care provider using patient management portal")
 
     System(healthstream, "HealthStream RAG", "HIPAA-compliant AI chatbot answering questions from personal health data")
 
@@ -24,7 +24,7 @@ C4Context
 
 ## Key Decisions
 
-- **Patients** interact via the MyAir mobile app (existing ResMed product)
-- **Clinicians** access via AirView (existing ResMed platform)
+- **Patients** interact via a mobile health app (e.g. companion CPAP app)
+- **Clinicians** access via a patient management portal
 - **Three data source types** each with a dedicated ingestion pipeline
 - All interactions go through HIPAA controls (encryption, audit, patient isolation)

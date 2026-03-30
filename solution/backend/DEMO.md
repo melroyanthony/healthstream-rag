@@ -5,11 +5,11 @@
 ```bash
 cd solution/backend
 
-# 1. Start server
-uv run uvicorn app.api.main:app --reload --port 8000
+# 1. Ingest sample data into local ChromaDB (no server needed)
+uv run python scripts/ingest_samples.py
 
-# 2. Run the full demo (ingests data + runs queries)
-bash scripts/demo.sh
+# 2. Start server (reads from the same persisted Chroma directory)
+uv run uvicorn app.api.main:app --reload --port 8000
 ```
 
 ## Manual Queries

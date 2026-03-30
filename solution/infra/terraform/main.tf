@@ -17,15 +17,20 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Project     = "healthstream-rag"
+      Project     = var.project_name
       Environment = var.environment
       ManagedBy   = "terraform"
-      CostCenter  = "resmed-assessment"
     }
   }
 }
 
 # --- Variables ---
+
+variable "project_name" {
+  description = "Project name used for tagging (applied via provider default tags)"
+  type        = string
+  default     = "healthstream"
+}
 
 variable "aws_region" {
   description = "AWS region for deployment"
@@ -68,6 +73,17 @@ variable "ecr_image_uri" {
   default     = ""
 }
 
+variable "allowed_origins" {
+  description = "CORS allowed origins for API Gateway"
+  type        = list(string)
+  default     = ["http://localhost:3000"]
+
+  validation {
+    condition     = var.environment == "demo" || var.environment == "dev" || !contains(var.allowed_origins, "*")
+    error_message = "allowed_origins must not contain \"*\" outside of the demo/dev environments."
+  }
+}
+
 # --- Modules ---
 
 module "networking" {
@@ -108,6 +124,7 @@ module "compute" {
   vector_backend            = var.vector_backend
   s3_vectors_bucket_name    = module.storage.s3_vectors_bucket_name
   ecr_image_uri             = var.ecr_image_uri
+  allowed_origins           = var.allowed_origins
 }
 
 module "monitoring" {

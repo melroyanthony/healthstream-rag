@@ -19,7 +19,7 @@ This repository is **HealthStream RAG** — a HIPAA-compliant, AWS-native RAG (R
 | `solution/backend/tests/` | pytest + RAGAS evaluation | Unit, integration, patient isolation, PHI leakage |
 | `solution/docs/architecture/` | C4 diagrams, OpenAPI, ADRs | Structurizr DSL + Mermaid |
 | `solution/docs/decisions/` | Architecture Decision Records | ADR-001 through ADR-007 |
-| `problem/` | Assignment brief + PDF | ResMed Lead SE AI take-home |
+| `problem/` | Assignment brief + PDF | Problem statement and context |
 
 ### Key Conventions
 

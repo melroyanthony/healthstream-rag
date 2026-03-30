@@ -1,13 +1,24 @@
 # HealthStream RAG
 
-> **HIPAA-compliant, AWS-native RAG chatbot** for querying personal health data across Apple HealthKit, FHIR R4, and legacy EHR systems -- with pluggable vector backends including Amazon S3 Vectors (GA Dec 2025).
+> **HIPAA-compliant RAG (Retrieval-Augmented Generation) framework** for building modular, open-source health data applications on AWS -- with pluggable vector backends including Amazon S3 Vectors (GA Dec 2025).
 
-[![Python](https://img.shields.io/badge/Python-3.13-blue)](https://www.python.org/)
-[![AWS Region](https://img.shields.io/badge/AWS-eu--west--1-orange)](https://aws.amazon.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/Tests-33%20passing-brightgreen)]()
+[![CI](https://github.com/melroyanthony/healthstream-rag/actions/workflows/ci.yml/badge.svg)](https://github.com/melroyanthony/healthstream-rag/actions/workflows/ci.yml)
+[![Python 3.13](https://img.shields.io/badge/Python-3.13-blue)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![AWS](https://img.shields.io/badge/AWS-S3%20Vectors%20%7C%20Bedrock%20%7C%20Lambda-orange)](https://aws.amazon.com/)
+[![Built With](https://img.shields.io/badge/Built%20With-Claude%20Code-purple)](https://claude.ai/code)
 
-Built as a **ResMed Lead Software Engineer AI** take-home assessment. The primary deliverable is the architectural design. The working implementation demonstrates the architecture is production-viable.
+---
+
+## What Is This?
+
+A production-grade, HIPAA-compliant RAG chatbot that lets patients query their personal health data across **Apple HealthKit**, **FHIR R4**, and **legacy EHR** systems. Designed for 10M+ daily users with $0 idle cost.
+
+**Key differentiators:**
+- **Patient isolation by design** -- `patient_id` injected from JWT, never user input
+- **PHI redaction before embedding** -- raw PHI never enters the vector store
+- **Pluggable backends** -- swap vector store, LLM, or embedder with one env var
+- **$0 idle cost** -- S3 Vectors + Lambda + DynamoDB = pay only when queried
 
 ---
 
@@ -15,8 +26,8 @@ Built as a **ResMed Lead Software Engineer AI** take-home assessment. The primar
 
 ```mermaid
 graph TB
-    Patient["Patient (MyAir App)"] -->|HTTPS| CF["CloudFront + WAF"]
-    CF --> APIGW["API Gateway"]
+    Patient["Patient (Health App)"] -->|HTTPS| CF["CloudFront + WAF (optional edge layer)"]
+    CF -.-> APIGW["API Gateway"]
     APIGW -->|Cognito JWT| Lambda["Lambda: Query Orchestrator"]
 
     Lambda --> HR["Hybrid Retriever"]
@@ -55,7 +66,7 @@ graph TB
 ## Quick Start
 
 ```bash
-# Clone and enter
+# Clone
 git clone https://github.com/melroyanthony/healthstream-rag.git
 cd healthstream-rag
 
@@ -72,7 +83,7 @@ MOCK_AUTH=true uv run uvicorn app.api.main:app --reload --port 8000
 curl -X POST http://localhost:8000/api/v1/ingest \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer synthetic-patient-001" \
-  -d '{"documents": [{"text": "Sleep session: myAir score 88, AHI 2.8", "source_type": "healthkit", "source_id": "s1"}]}'
+  -d '{"documents": [{"text": "Sleep session: sleep score 88, AHI 2.8", "source_type": "healthkit", "source_id": "s1"}]}'
 
 curl -X POST http://localhost:8000/api/v1/query \
   -H "Content-Type: application/json" \
@@ -86,11 +97,11 @@ curl -X POST http://localhost:8000/api/v1/query \
 
 ```
 healthstream-rag/
-├── problem/                      # Assignment brief + original PDF
+├── problem/                      # Problem statement and context
 │   ├── problem.md                # Comprehensive problem statement with ADRs
-│   └── data/problem.pdf          # Original ResMed assessment PDF
+│   └── data/problem.pdf          # Original assessment PDF
 │
-├── solution/                     # All generated artifacts
+├── solution/                     # All implementation artifacts
 │   ├── backend/                  # FastAPI application
 │   │   ├── app/                  # Application code
 │   │   │   ├── api/              # Routes, query controller, Lambda handler
@@ -99,19 +110,20 @@ healthstream-rag/
 │   │   │   ├── retrievers/       # Vector, BM25, hybrid retriever
 │   │   │   ├── generators/       # Anthropic + Bedrock generators
 │   │   │   ├── embedders/        # Local + Bedrock Titan embedders
+│   │   │   ├── loaders/          # HealthKit, FHIR, EHR data loaders
 │   │   │   ├── middleware/       # Patient isolation + PHI redaction
 │   │   │   └── guardrails/       # PHI check, grounding, disclaimer
-│   │   ├── tests/                # 33 unit tests
+│   │   ├── tests/                # 34 unit tests
 │   │   ├── data/                 # Sample data + 15 golden test Q&A pairs
 │   │   └── scripts/              # Evaluation, ingestion, Lambda packaging
 │   │
-│   ├── infra/terraform/          # AWS IaC (5 modules)
-│   │   └── modules/              # networking, compute, storage, security, monitoring
+│   ├── infra/terraform/          # AWS IaC (6 modules)
+│   │   └── modules/              # networking, compute, storage, security, monitoring, edge
 │   │
 │   ├── docs/
 │   │   ├── architecture/         # System design, OpenAPI, database schema
 │   │   │   ├── c4/               # 6 C4 Mermaid diagrams
-│   │   │   └── workspace.dsl     # Structurizr DSL (canonical)
+│   │   │   └── workspace.dsl    # Structurizr DSL (canonical C4 source)
 │   │   ├── decisions/            # 6 ADRs (001-006)
 │   │   └── deployment/           # AWS deployment guide
 │   │
@@ -119,11 +131,45 @@ healthstream-rag/
 │   ├── docker-compose.yml        # Local dev stack
 │   └── README.md                 # Detailed solution documentation
 │
-└── .github/                      # CI/CD, issue templates, Copilot review config
-    ├── workflows/                # CI (tests + Docker), release (semantic versioning)
-    ├── ISSUE_TEMPLATE/           # Bug, feature forms
-    └── instructions/             # Copilot code review standards (OWASP + HIPAA)
+├── .github/                      # CI/CD, issue templates, Copilot review config
+│   ├── workflows/                # CI (tests + Docker), release (semantic versioning)
+│   └── ISSUE_TEMPLATE/           # Bug, feature forms
+│
+├── LICENSE                       # MIT
+├── CONTRIBUTING.md               # Contribution guidelines
+├── SECURITY.md                   # Vulnerability disclosure policy
+└── README.md                     # This file
 ```
+
+---
+
+## Technology Stack
+
+| Layer | Local Dev | Production (AWS) |
+|---|---|---|
+| **API** | FastAPI + Uvicorn | Lambda + API Gateway + Cognito |
+| **Vector Store** | ChromaDB | S3 Vectors |
+| **LLM** | Anthropic direct API | Bedrock Claude Haiku 4.5 |
+| **Embeddings** | sentence-transformers (384d) | Bedrock Titan V2 (1024d) |
+| **BM25 Retrieval** | ChromaDB corpus | DynamoDB corpus |
+| **PHI Redaction** | Regex patterns | AWS Comprehend Medical |
+| **Auth** | Mock (Bearer token) | Cognito JWT |
+| **IaC** | Docker Compose | Terraform (6 modules) |
+
+---
+
+## Configuration
+
+All configuration via environment variables (see [`backend/.env.example`](solution/backend/.env.example)):
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `VECTOR_BACKEND` | `chroma` | Vector store: `chroma`, `s3vectors` |
+| `LLM_BACKEND` | `anthropic` | LLM: `anthropic`, `bedrock` |
+| `EMBEDDER_BACKEND` | `local` | Embedder: `local`, `bedrock` |
+| `ANTHROPIC_API_KEY` | _(empty)_ | Anthropic API key (leave blank for mock) |
+| `MOCK_AUTH` | `true` | Use mock JWT authentication |
+| `AWS_REGION` | `eu-west-1` | AWS region for production services |
 
 ---
 
@@ -134,13 +180,13 @@ healthstream-rag/
 | [C4 Context](solution/docs/architecture/c4/c4-context.md) | System context -- patients, clinicians, data sources |
 | [C4 Container](solution/docs/architecture/c4/c4-container.md) | Containers -- API GW, Query Orchestrator, data stores |
 | [C4 Component: Query](solution/docs/architecture/c4/c4-component-query.md) | RAG pipeline internals |
-| [C4 Component: Ingestion](solution/docs/architecture/c4/c4-component-ingestion.md) | Phase 1 + Phase 2 ingestion |
-| [C4 Deployment](solution/docs/architecture/c4/c4-deployment.md) | AWS eu-west-1 topology |
+| [C4 Component: Ingestion](solution/docs/architecture/c4/c4-component-ingestion.md) | Ingestion pipeline |
+| [C4 Deployment](solution/docs/architecture/c4/c4-deployment.md) | AWS deployment topology |
 | [HIPAA Controls](solution/docs/architecture/c4/hipaa-controls.md) | 4-layer defense model |
 | [System Design](solution/docs/architecture/system-design.md) | Scale analysis, patterns, trade-offs |
 | [OpenAPI Spec](solution/docs/architecture/openapi.yaml) | 6 endpoints, full schemas |
 | [Database Schema](solution/docs/architecture/database-schema.md) | Vector store + DynamoDB tables |
-| [AWS Deployment Guide](solution/docs/deployment/aws-deployment-guide.md) | Step-by-step deploy to eu-west-1 |
+| [AWS Deployment Guide](solution/docs/deployment/aws-deployment-guide.md) | Step-by-step deploy |
 
 ---
 
@@ -149,7 +195,7 @@ healthstream-rag/
 ```bash
 cd solution/backend
 
-# Unit tests (33 tests, ~4s)
+# Unit tests (34 tests, ~5s)
 MOCK_AUTH=true uv run pytest tests/ -v
 
 # RAGAS evaluation (15 golden Q&A pairs)
@@ -161,29 +207,28 @@ bash ../scripts/test-e2e.sh
 
 | Test Suite | Count | What It Validates |
 |---|---|---|
-| Unit tests | 33 | Health, query, ingest, collections, vector DB, patient isolation, PHI redaction, guardrails |
+| Unit tests | 34 | Health, query, ingest, collections, vector DB, patient isolation, PHI redaction, guardrails |
 | RAGAS eval | 15 | Faithfulness, answer relevancy, context precision, context recall, PHI leakage (=0), patient isolation (PASS) |
 | E2E | 9 | Full CRUD flow against running API |
 
 ---
 
-## Technology Stack
+## Contributing
 
-| Layer | Local Dev | Production (AWS) |
-|---|---|---|
-| **API** | FastAPI + Uvicorn | Lambda + API Gateway + Cognito |
-| **Vector Store** | ChromaDB | S3 Vectors (eu-west-1) |
-| **LLM** | Anthropic direct API | Bedrock Claude Haiku 4.5 |
-| **Embeddings** | sentence-transformers (384d) | Bedrock Titan V2 (1024d) |
-| **PHI Redaction** | Regex patterns | AWS Comprehend Medical |
-| **Auth** | Mock (Bearer token) | Cognito JWT (Phase 2) |
-| **IaC** | Docker Compose | Terraform (5 modules) |
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, code standards, and pull request process.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for vulnerability disclosure policy and HIPAA security design.
+
+## License
+
+[MIT](LICENSE)
 
 ---
 
-## Author
-
 **Melroy Anthony** -- AI Architect & Lead Software Engineer | Dublin, Ireland
 
-Built for the ResMed Lead Software Engineer AI take-home assessment.
 Architecture designed for patient impact -- not dashboards.
+
+*Built with [Claude Code](https://claude.ai/code) + [sdlc-claude-code-conf](https://github.com/melroyanthony/sdlc-claude-code-conf)*

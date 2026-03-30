@@ -44,7 +44,7 @@ CODE=$(curl -s "${CURL_OPTS[@]}" -o /dev/null -w "%{http_code}" -X POST "$BASE_U
   -d '{
     "documents": [
       {
-        "text": "Sleep session: myAir score 88, therapy hours 7.5, AHI 2.8 events/hour. Device: AirSense 11.",
+        "text": "Sleep session: sleep score 88, therapy hours 7.5, AHI 2.8 events/hour. Device: AutoSet CPAP.",
         "source_type": "healthkit",
         "source_id": "e2e-session-001"
       },
