@@ -13,8 +13,7 @@
 - `problem/data/problem.pdf` - Supplementary PDF
 
 ## Project Context
-- **Domain**: Healthcare AI - HIPAA-compliant RAG chatbot
-- **Domain**: Healthcare AI — HIPAA-compliant RAG
+- **Domain**: Healthcare AI — HIPAA-compliant RAG chatbot
 - **Scale**: 10M+ daily active users
 - **Stack**: FastAPI + AWS (S3 Vectors, DynamoDB, Bedrock, Lambda)
 - **Key differentiators**: Patient isolation, PHI redaction, hybrid retrieval, Cognita-inspired modular design

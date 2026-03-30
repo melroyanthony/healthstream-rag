@@ -27,7 +27,7 @@ provider "aws" {
 # --- Variables ---
 
 variable "project_name" {
-  description = "Project name used for resource naming and tagging"
+  description = "Project name used for tagging (applied via provider default tags)"
   type        = string
   default     = "healthstream"
 }
@@ -76,7 +76,12 @@ variable "ecr_image_uri" {
 variable "allowed_origins" {
   description = "CORS allowed origins for API Gateway"
   type        = list(string)
-  default     = ["*"]
+  default     = ["http://localhost:3000"]
+
+  validation {
+    condition     = var.environment == "dev" || !contains(var.allowed_origins, "*")
+    error_message = "allowed_origins must not contain \"*\" outside of the dev environment."
+  }
 }
 
 # --- Modules ---

@@ -32,6 +32,6 @@ HealthStream RAG is designed with HIPAA compliance in mind:
 - **Encryption in Transit**: TLS 1.2+ enforced on all API endpoints
 - **Audit Trail**: CloudTrail logging for all API calls
 - **VPC Isolation**: Lambda runs in private subnets with VPC endpoints (no NAT gateway)
-- **WAF**: Rate limiting and common attack pattern protection
+- **WAF**: Web ACL provisioned for rate limiting and common attack patterns; enforcement requires an edge distribution (e.g. CloudFront) in front of API Gateway
 
 See [HIPAA Controls](solution/docs/architecture/c4/hipaa-controls.md) for the full control mapping.

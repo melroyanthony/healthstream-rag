@@ -26,8 +26,8 @@ A production-grade, HIPAA-compliant RAG chatbot that lets patients query their p
 
 ```mermaid
 graph TB
-    Patient["Patient (Health App)"] -->|HTTPS| CF["CloudFront + WAF"]
-    CF --> APIGW["API Gateway"]
+    Patient["Patient (Health App)"] -->|HTTPS| CF["CloudFront + WAF (optional edge layer)"]
+    CF -.-> APIGW["API Gateway"]
     APIGW -->|Cognito JWT| Lambda["Lambda: Query Orchestrator"]
 
     Lambda --> HR["Hybrid Retriever"]
@@ -122,7 +122,8 @@ healthstream-rag/
 │   │
 │   ├── docs/
 │   │   ├── architecture/         # System design, OpenAPI, database schema
-│   │   │   └── c4/               # 6 C4 Mermaid diagrams
+│   │   │   ├── c4/               # 6 C4 Mermaid diagrams
+│   │   │   └── workspace.dsl    # Structurizr DSL (canonical C4 source)
 │   │   ├── decisions/            # 6 ADRs (001-006)
 │   │   └── deployment/           # AWS deployment guide
 │   │
