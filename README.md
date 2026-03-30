@@ -160,7 +160,15 @@ healthstream-rag/
 
 ## Configuration
 
-All configuration via environment variables (see [`backend/.env.example`](solution/backend/.env.example)):
+All configuration via environment variables. Copy the appropriate profile to `.env`:
+
+```bash
+# Local dev (ChromaDB + Anthropic)
+cp solution/backend/.env.local solution/backend/.env
+
+# AWS production (S3 Vectors + Bedrock)
+cp solution/backend/.env.aws.example solution/backend/.env
+```
 
 | Variable | Default | Description |
 |----------|---------|-------------|

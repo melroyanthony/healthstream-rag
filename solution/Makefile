@@ -61,7 +61,7 @@ ecr-login:
 deploy: ecr-login
 	@echo "==> Building Lambda container ($(VERSION))..."
 	docker build --platform linux/arm64 --provenance=false --no-cache \
-		-f $(BACKEND_DIR)/Dockerfile.lambda \
+		--target lambda \
 		-t healthstream-rag-lambda:$(VERSION) \
 		$(BACKEND_DIR)
 	@echo "==> Pushing to ECR..."

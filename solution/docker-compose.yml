@@ -3,16 +3,14 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      target: local
     ports:
       - "8000:8000"
+    env_file:
+      - ./backend/.env.local
     environment:
-      - VECTOR_BACKEND=chroma
-      - LLM_BACKEND=anthropic
-      - EMBEDDER_BACKEND=local
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-      - MOCK_AUTH=true
       - CHROMA_PERSIST_DIRECTORY=/data/chroma
-      - DEBUG=true
     volumes:
       - chroma_data:/data/chroma
     healthcheck:

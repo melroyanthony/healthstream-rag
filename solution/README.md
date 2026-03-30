@@ -183,7 +183,12 @@ solution/
 
 ## Configuration
 
-All configuration via environment variables (see `backend/.env.example`):
+All configuration via environment variables. Copy the appropriate profile to `.env`:
+
+```bash
+cp backend/.env.local backend/.env       # Local dev
+cp backend/.env.aws.example backend/.env  # AWS production
+```
 
 | Variable | Default | Description |
 |----------|---------|-------------|
