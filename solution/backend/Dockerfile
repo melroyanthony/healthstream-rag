@@ -9,7 +9,7 @@
 #   docker build --target lambda -t healthstream-rag:lambda --platform linux/arm64 .
 
 # ============================================================================
-# Stage: base — shared dependencies (core only, no local group)
+# Stage: base — shared tooling and project metadata (uv + pyproject + lockfile)
 # ============================================================================
 FROM python:3.13-slim AS base
 

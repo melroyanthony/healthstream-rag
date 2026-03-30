@@ -183,7 +183,7 @@ solution/
 
 ## Configuration
 
-All configuration via environment variables. Copy the appropriate profile to `.env`:
+All configuration via environment variables. Copy the appropriate profile to `.env` (used by both `uv run` and `docker compose`):
 
 ```bash
 cp backend/.env.local backend/.env       # Local dev
