@@ -88,13 +88,12 @@ cd ../..   # back to solution/ from solution/infra/terraform/
 make deploy-lambda
 ```
 
-This runs `solution/backend/scripts/package_lambda.sh` which:
-1. Installs production dependencies into a temp directory via `uv`
-2. Copies `app/` into the package
-3. Creates `lambda-package.zip`
+This builds the Lambda container using the unified multi-stage Dockerfile:
+1. `docker build --target lambda` — installs production-only deps via `uv export --no-group local`
+2. Pushes the arm64 container image to ECR
+3. Updates the Lambda function code to point at the new image
 
-Then the Makefile uploads the zip to the `healthstream-demo-query` Lambda function
-using `aws lambda update-function-code`.
+The same `Dockerfile` is used for both local dev (`--target local`) and Lambda (`--target lambda`). No separate `Dockerfile.lambda` or `requirements-lambda.txt` needed.
 
 ### 6. Ingest sample data
 
@@ -102,7 +101,7 @@ using `aws lambda update-function-code`.
 make ingest-samples
 ```
 
-`make ingest-samples` targets the local ChromaDB store. For AWS ingestion, set the environment variables to point at S3 Vectors and Bedrock:
+The same codebase handles both local and AWS — `make ingest-samples` reads from your `.env` file. For AWS ingestion, copy the AWS profile and set the environment:
 
 ```bash
 cd backend    # from solution/
