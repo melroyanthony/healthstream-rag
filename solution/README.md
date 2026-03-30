@@ -166,7 +166,7 @@ solution/
 ├── scripts/
 │   └── test-e2e.sh            # E2E happy path test
 ├── infra/
-│   └── terraform/             # AWS IaC (5 modules)
+│   └── terraform/             # AWS IaC (6 modules)
 │       ├── main.tf            # Root module + variables
 │       └── modules/
 │           ├── networking/    # VPC, PrivateLink endpoints
@@ -240,7 +240,7 @@ cp backend/.env.aws.example backend/.env  # AWS production
 
 ## AWS Deployment (Terraform)
 
-> **Note:** Terraform provisions infrastructure scaffolding. The Lambda deploys with a placeholder artifact — a CI/CD pipeline (or `make deploy-lambda`) replaces it with the real application package. `MOCK_AUTH=true` is set for the demo; production JWT validation requires Cognito integration.
+> **Note:** Terraform provisions infrastructure scaffolding. The Lambda deploys with a placeholder artifact — `make deploy` builds the container (`--target lambda`), pushes to ECR, and updates the function.
 
 ```bash
 cd solution/infra/terraform
@@ -249,10 +249,10 @@ terraform plan -out=healthstream.plan
 terraform apply healthstream.plan
 
 # After infra is up, deploy the Lambda artifact:
-# cd solution/backend && make deploy-lambda
+# cd solution && make deploy
 ```
 
-5 modules: `networking` (VPC + PrivateLink), `compute` (Lambda + API Gateway), `storage` (S3 Vectors + DynamoDB), `security` (KMS + Cognito + IAM), `monitoring` (CloudTrail + CloudWatch).
+6 modules: `networking` (VPC + PrivateLink), `compute` (Lambda + API Gateway), `storage` (S3 Vectors + DynamoDB), `security` (KMS + Cognito + IAM), `monitoring` (CloudTrail + CloudWatch), `edge` (WAF).
 
 ## Feature Parity: Local Dev vs Production
 

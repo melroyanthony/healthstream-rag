@@ -33,7 +33,7 @@
 - [x] Default deps + dependency groups (local + dev)
 - [x] Env profiles (.env.local + .env.aws.example)
 - [ ] Registry-based polymorphism (decorator self-registration) — using factory functions instead
-- [ ] DynamoDB corpus backend for BM25 on S3 Vectors path
+- [x] DynamoDB corpus backend for BM25 on S3 Vectors path
 - [ ] Cohere Rerank via Bedrock (currently SimpleReranker)
 
 ## Could Have (Nice to have)
