@@ -240,7 +240,7 @@ cp backend/.env.aws.example backend/.env  # AWS production
 
 ## AWS Deployment (Terraform)
 
-> **Note:** Terraform provisions infrastructure scaffolding. The Lambda deploys with a placeholder artifact — `make deploy` builds the container (`--target lambda`), pushes to ECR, and updates the function.
+> **Note:** Terraform provisions infrastructure. Before `terraform apply`, create the ECR repo once: `aws ecr create-repository --repository-name healthstream-rag --region eu-west-1`. Then `make deploy` builds the container (`--target lambda`), pushes to ECR, and updates the Lambda function.
 
 ```bash
 cd solution

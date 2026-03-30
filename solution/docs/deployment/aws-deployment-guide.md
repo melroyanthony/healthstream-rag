@@ -79,7 +79,15 @@ s3_vectors_bucket     = "healthstream-demo-vectors-<account>"
 
 Save these values; you will need the `api_endpoint` later.
 
-### 5. Package and deploy the Lambda
+### 5. Create ECR repository (first-time only)
+
+The ECR repository is not managed by Terraform (to avoid destroying images on `terraform destroy`). Create it once:
+
+```bash
+aws ecr create-repository --repository-name healthstream-rag --region eu-west-1 --no-cli-pager
+```
+
+### 6. Build and deploy the Lambda
 
 Navigate back to `solution/` (from terraform dir):
 
