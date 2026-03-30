@@ -85,7 +85,7 @@ Navigate back to `solution/` (from terraform dir):
 
 ```bash
 cd ../..   # back to solution/ from solution/infra/terraform/
-make deploy-lambda
+make deploy
 ```
 
 This builds the Lambda container using the unified multi-stage Dockerfile:
@@ -232,7 +232,7 @@ aws --version   # must be >= 2.22
 # Do NOT use `pip install awscli` — that installs v1
 ```
 
-### `make deploy-lambda` zip is too large (> 50 MB)
+### `make deploy` zip is too large (> 50 MB)
 
 Lambda limits: 50 MB direct upload, 250 MB unzipped. If your package exceeds either:
 - Exclude local-only deps (`sentence-transformers`, `torch`) — production uses Bedrock embeddings
