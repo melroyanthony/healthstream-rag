@@ -9,11 +9,11 @@ def test_patient_isolation_zero_cross_retrieval(vector_db, embedder):
     vector_db.create_collection("test", dimension=384)
 
     docs_a = [
-        "Patient A sleep session: myAir score 85, AHI 3.2",
+        "Patient A sleep session: sleep score 85, AHI 3.2",
         "Patient A medication: CPAP therapy prescribed",
     ]
     docs_b = [
-        "Patient B sleep session: myAir score 65, AHI 8.5",
+        "Patient B sleep session: sleep score 65, AHI 8.5",
         "Patient B medication: BiPAP under evaluation",
     ]
 

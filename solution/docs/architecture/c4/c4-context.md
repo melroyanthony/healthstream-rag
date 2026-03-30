@@ -6,8 +6,8 @@
 C4Context
     title HealthStream RAG - System Context
 
-    Person(patient, "Patient", "MyAir app user on iPhone/Android with CPAP device")
-    Person(clinician, "Clinician", "Care provider using AirView patient management")
+    Person(patient, "Patient", "Health app user on iPhone/Android with CPAP device")
+    Person(clinician, "Clinician", "Care provider using patient management portal")
 
     System(healthstream, "HealthStream RAG", "HIPAA-compliant AI chatbot answering questions from personal health data")
 

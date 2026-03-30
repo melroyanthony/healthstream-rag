@@ -4,7 +4,7 @@ Normalizes Apple HealthKit and Google Health Connect data
 into documents for the RAG pipeline.
 
 Data types: sleep sessions, AHI, mask seal, therapy hours,
-myAir scores, device events.
+sleep scores, device events.
 
 Production: receives events via Kinesis Data Streams.
 Demo: accepts HealthKit-format JSON directly.
@@ -29,12 +29,12 @@ class HealthKitLoader(BaseDataLoader):
             "sessions": [
                 {
                     "date": "2026-03-22",
-                    "myair_score": 88,
+                    "sleep_score": 88,
                     "therapy_hours": 7.5,
                     "ahi": 2.8,
                     "mask_seal": "Good",
                     "leak_rate": 3.2,
-                    "device": "AirSense 11 AutoSet"
+                    "device": "AutoSet CPAP"
                 }
             ]
         }
@@ -44,8 +44,8 @@ class HealthKitLoader(BaseDataLoader):
             date = session.get("date", "unknown")
             parts = [f"Sleep session {date}:"]
 
-            if "myair_score" in session:
-                parts.append(f"myAir score {session['myair_score']} out of 100.")
+            if "sleep_score" in session:
+                parts.append(f"sleep score {session['sleep_score']} out of 100.")
             if "therapy_hours" in session:
                 parts.append(f"Therapy hours {session['therapy_hours']}.")
             if "ahi" in session:
@@ -61,7 +61,7 @@ class HealthKitLoader(BaseDataLoader):
                 LoadedDocument(
                     text=" ".join(parts),
                     source_type="healthkit",
-                    source_id=f"myair-{date}",
+                    source_id=f"sleep-session-{date}",
                     metadata={"date": date},
                 )
             )

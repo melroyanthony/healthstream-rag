@@ -6,7 +6,7 @@
 C4Container
     title HealthStream RAG - Container Diagram
 
-    Person(patient, "Patient", "MyAir app user")
+    Person(patient, "Patient", "Health app user")
 
     System_Boundary(healthstream, "HealthStream RAG") {
         Container(api_gw, "API Gateway", "AWS API Gateway + CloudFront + WAF", "Request routing, rate limiting, auth")

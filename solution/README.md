@@ -6,7 +6,7 @@ HIPAA-compliant RAG chatbot for personal health data. Modular, open-source, AWS-
 
 ```mermaid
 graph TB
-    Patient["Patient (MyAir App)"] -->|HTTPS| API["FastAPI API Gateway"]
+    Patient["Patient (Health App)"] -->|HTTPS| API["FastAPI API Gateway"]
     API -->|JWT| Auth["Patient Isolation Middleware"]
     Auth -->|patient_id| QC["Query Controller"]
 
@@ -111,7 +111,7 @@ curl -X POST http://localhost:8000/api/v1/query \
 Response:
 ```json
 {
-  "answer": "Based on your health records: Your average myAir score was approximately 82/100...",
+  "answer": "Based on your health records: Your average sleep score was approximately 82/100...",
   "citations": [
     {
       "source_id": "weekly_summary_2026-03-23",

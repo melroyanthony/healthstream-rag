@@ -34,7 +34,7 @@ HealthStream RAG is designed with HIPAA compliance in mind:
 - **PHI Redaction**: Personally identifiable health information is redacted before embedding
 - **Encryption**: KMS encryption at rest for all data stores (S3, DynamoDB, CloudWatch)
 - **Encryption in Transit**: TLS 1.2+ enforced on all API endpoints
-- **Audit Trail**: CloudTrail logging for all API calls
+- **Audit Trail**: CloudTrail for AWS account activity, API Gateway access logs and CloudWatch for request-level HTTP auditing
 - **VPC Isolation**: Lambda runs in private subnets with VPC endpoints (no NAT gateway)
 - **WAF**: Web ACL provisioned for rate limiting and common attack patterns; enforcement requires an edge distribution (e.g. CloudFront) in front of API Gateway
 

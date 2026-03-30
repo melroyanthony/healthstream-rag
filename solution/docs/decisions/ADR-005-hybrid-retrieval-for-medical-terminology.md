@@ -6,7 +6,7 @@ Accepted
 ## Context
 Medical terminology has exact-match requirements that pure semantic search handles poorly:
 - Drug names: "metformin" vs "biguanide" -- semantic similarity is high but clinical distinction matters
-- Device identifiers: "AirSense 11 S/N 12345" -- exact match critical
+- Device identifiers: "AutoSet CPAP S/N 12345" -- exact match critical
 - ICD-10 codes: "E11.9" -- no semantic neighbourhood, only exact match
 
 ## Decision

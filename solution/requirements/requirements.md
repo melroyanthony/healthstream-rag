@@ -16,7 +16,7 @@ Build a **HIPAA-compliant, AWS-native RAG (Retrieval-Augmented Generation) chatb
 - Enforce grounding threshold (0.85) to prevent hallucination
 
 ### FR-2: Data Ingestion (Three Pipelines)
-- **HealthKit/Health Connect**: Real-time streaming via Kinesis (sleep sessions, AHI, mask seal, therapy hours, myAir scores)
+- **HealthKit/Health Connect**: Real-time streaming via Kinesis (sleep sessions, AHI, mask seal, therapy hours, sleep scores)
 - **FHIR R4**: Event-driven via AWS HealthLake (Patient, Observation, Condition, MedicationRequest, CarePlan)
 - **EHR/HL7v2**: Batch ingestion via S3 landing zone (legacy clinical records)
 

@@ -11,7 +11,7 @@ def test_ingest_documents(client):
         json={
             "documents": [
                 {
-                    "text": "Sleep session: myAir score 85, AHI 3.2 events/hour",
+                    "text": "Sleep session: sleep score 85, AHI 3.2 events/hour",
                     "source_type": "healthkit",
                     "source_id": "session-001",
                 },

@@ -29,10 +29,10 @@ def test_redacts_mrn():
 
 def test_preserves_medical_content():
     """Should not redact medical terminology."""
-    text = "AHI: 3.2 events/hour. myAir score: 85/100. CPAP therapy."
+    text = "AHI: 3.2 events/hour. sleep score: 85/100. CPAP therapy."
     result = redact_phi(text)
     assert "AHI" in result
-    assert "myAir" in result
+    assert "sleep score" in result
     assert "CPAP" in result
 
 

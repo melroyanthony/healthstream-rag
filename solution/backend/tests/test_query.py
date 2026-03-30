@@ -26,7 +26,7 @@ def test_query_with_data_returns_citations(client):
         json={
             "documents": [
                 {
-                    "text": "Sleep session: myAir score 85, therapy hours 7.2, AHI 3.2",
+                    "text": "Sleep session: sleep score 85, therapy hours 7.2, AHI 3.2",
                     "source_type": "healthkit",
                     "source_id": "session-001",
                 },
@@ -77,7 +77,7 @@ def test_query_deduplicates_citations_by_source_id(client):
             json={
                 "documents": [
                     {
-                        "text": "Sleep session: myAir score 88, AHI 2.1",
+                        "text": "Sleep session: sleep score 88, AHI 2.1",
                         "source_type": "healthkit",
                         "source_id": "dup-session-001",
                     },

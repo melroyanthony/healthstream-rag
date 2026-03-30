@@ -5,7 +5,7 @@ or from the vector DB (local dev with ChromaDB).
 
 Critical for medical terminology where exact match matters:
 - Drug names: "metformin" vs "biguanide"
-- Device IDs: "AirSense 11 S/N 12345"
+- Device IDs: "AutoSet CPAP S/N 12345"
 - ICD-10 codes: "E11.9"
 """
 
