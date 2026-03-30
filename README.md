@@ -83,7 +83,7 @@ MOCK_AUTH=true uv run uvicorn app.api.main:app --reload --port 8000
 curl -X POST http://localhost:8000/api/v1/ingest \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer synthetic-patient-001" \
-  -d '{"documents": [{"text": "Sleep session: myAir score 88, AHI 2.8", "source_type": "healthkit", "source_id": "s1"}]}'
+  -d '{"documents": [{"text": "Sleep session: sleep score 88, AHI 2.8", "source_type": "healthkit", "source_id": "s1"}]}'
 
 curl -X POST http://localhost:8000/api/v1/query \
   -H "Content-Type: application/json" \

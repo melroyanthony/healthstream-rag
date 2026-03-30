@@ -79,8 +79,8 @@ variable "allowed_origins" {
   default     = ["http://localhost:3000"]
 
   validation {
-    condition     = var.environment == "dev" || !contains(var.allowed_origins, "*")
-    error_message = "allowed_origins must not contain \"*\" outside of the dev environment."
+    condition     = var.environment == "demo" || var.environment == "dev" || !contains(var.allowed_origins, "*")
+    error_message = "allowed_origins must not contain \"*\" outside of the demo/dev environments."
   }
 }
 

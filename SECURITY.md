@@ -12,7 +12,11 @@ If you discover a security vulnerability in HealthStream RAG, please report it r
 
 **Do NOT open a public GitHub issue for security vulnerabilities.**
 
-Instead, please email: [themelroyanthony@gmail.com](mailto:themelroyanthony@gmail.com)
+Instead, use GitHub's private security reporting:
+
+1. Navigate to the repository's **Security** tab
+2. Click **Report a vulnerability**
+3. Follow the prompts to create a private security advisory
 
 Include:
 - Description of the vulnerability
