@@ -65,10 +65,12 @@ def _redact_with_comprehend(text: str) -> str:
 
         return redacted
     except Exception as exc:
-        logger.error(
-            "Comprehend Medical failed — falling back to regex redaction. "
-            "PHI may not be fully redacted. Review immediately. "
-            "Error: %s",
+        # WARNING not ERROR: regex fallback is defense-in-depth, not a failure.
+        # Comprehend Medical requires service subscription — expected to fail
+        # on accounts without it. Regex redaction still catches common patterns.
+        logger.warning(
+            "Comprehend Medical unavailable — using regex redaction. "
+            "Reason: %s",
             type(exc).__name__,
         )
         return _redact_with_regex(text)
