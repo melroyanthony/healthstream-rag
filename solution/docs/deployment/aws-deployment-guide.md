@@ -240,21 +240,11 @@ aws --version   # must be >= 2.22
 # Do NOT use `pip install awscli` — that installs v1
 ```
 
-### `make deploy` zip is too large (> 50 MB)
+### Lambda container image is too large
 
-Lambda limits: 50 MB direct upload, 250 MB unzipped. If your package exceeds either:
-- Exclude local-only deps (`sentence-transformers`, `torch`) — production uses Bedrock embeddings
-- Or use a Lambda layer for large deps
-- Upload via S3 for the 50 MB limit:
-
-```bash
-aws s3 cp solution/backend/lambda-package.zip s3://<deployment-bucket>/lambda-package.zip
-aws lambda update-function-code \
-  --function-name healthstream-demo-query \
-  --s3-bucket <deployment-bucket> \
-  --s3-key lambda-package.zip \
-  --region eu-west-1
-```
+Lambda container images have a 10 GB limit (vs 250 MB for zip). The `--target lambda` stage excludes local-only deps (chromadb, sentence-transformers, torch) via `uv export --no-group local`, keeping the image under 300 MB. If the image grows:
+- Check for accidental inclusion of local deps — verify `uv export --no-group local --no-group dev` output
+- Use `docker history healthstream-rag:lambda` to identify large layers
 
 ### Ingest script reports 0 documents
 
