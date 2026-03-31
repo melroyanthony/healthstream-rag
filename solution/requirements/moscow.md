@@ -24,7 +24,7 @@
 - [x] BM25 keyword retriever with rank-bm25
 - [x] Bedrock Titan Embedder (production)
 - [x] Local dev embedder (sentence-transformers, zero AWS cost)
-- [x] RAGAS evaluation framework integration
+- [x] RAGAS-style evaluation pipeline (custom golden-set evaluation script)
 - [x] Golden test set (15 Q&A pairs with ground truth)
 - [x] DynamoDB metadata store (session context, patient metadata)
 - [x] structlog added as dependency (structured logging integration pending)

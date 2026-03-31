@@ -258,7 +258,7 @@ terraform apply healthstream.plan
 # cd solution && make deploy
 ```
 
-6 modules: `networking` (VPC + PrivateLink), `compute` (Lambda + API Gateway), `storage` (S3 Vectors + DynamoDB), `security` (KMS + Cognito + IAM), `monitoring` (CloudTrail + CloudWatch), `edge` (WAF).
+6 modules: `networking` (VPC + PrivateLink), `compute` (Lambda + API Gateway), `storage` (S3 Vectors + DynamoDB), `security` (KMS + Cognito + IAM), `monitoring` (CloudTrail + CloudWatch), `edge` (standalone WAFv2 Web ACL — attaches via CloudFront, not HTTP API directly).
 
 ## Feature Parity: Local Dev vs Production
 
