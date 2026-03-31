@@ -79,30 +79,37 @@ s3_vectors_bucket     = "healthstream-demo-vectors-<account>"
 
 Save these values; you will need the `api_endpoint` later.
 
-### 5. Package and deploy the Lambda
+### 5. Create ECR repository (first-time only)
+
+The ECR repository is not managed by Terraform (to avoid destroying images on `terraform destroy`). Create it once:
+
+```bash
+aws ecr create-repository --repository-name healthstream-rag --region eu-west-1 --no-cli-pager
+```
+
+### 6. Build and deploy the Lambda
 
 Navigate back to `solution/` (from terraform dir):
 
 ```bash
 cd ../..   # back to solution/ from solution/infra/terraform/
-make deploy-lambda
+make deploy
 ```
 
-This runs `solution/backend/scripts/package_lambda.sh` which:
-1. Installs production dependencies into a temp directory via `uv`
-2. Copies `app/` into the package
-3. Creates `lambda-package.zip`
+This builds the Lambda container using the unified multi-stage Dockerfile:
+1. `docker build --target lambda` — installs production-only deps via `uv export --no-group local --no-group dev --no-hashes` then `pip install`
+2. Pushes the arm64 container image to ECR
+3. Updates the Lambda function code to point at the new image
 
-Then the Makefile uploads the zip to the `healthstream-demo-query` Lambda function
-using `aws lambda update-function-code`.
+The same `Dockerfile` is used for both local dev (`--target local`) and Lambda (`--target lambda`). No separate `Dockerfile.lambda` or `requirements-lambda.txt` needed.
 
-### 6. Ingest sample data
+### 7. Ingest sample data
 
 ```bash
 make ingest-samples
 ```
 
-`make ingest-samples` targets the local ChromaDB store. For AWS ingestion, set the environment variables to point at S3 Vectors and Bedrock:
+The same codebase handles both local and AWS — `make ingest-samples` reads from your `.env` file. For AWS ingestion, copy the AWS profile and set the environment:
 
 ```bash
 cd backend    # from solution/
@@ -114,7 +121,7 @@ MOCK_AUTH=true \
 uv run python scripts/ingest_samples.py
 ```
 
-### 7. Verify the deployment
+### 8. Verify the deployment
 
 Check the Lambda is healthy:
 
@@ -233,21 +240,11 @@ aws --version   # must be >= 2.22
 # Do NOT use `pip install awscli` — that installs v1
 ```
 
-### `make deploy-lambda` zip is too large (> 50 MB)
+### Lambda container image is too large
 
-Lambda limits: 50 MB direct upload, 250 MB unzipped. If your package exceeds either:
-- Exclude local-only deps (`sentence-transformers`, `torch`) — production uses Bedrock embeddings
-- Or use a Lambda layer for large deps
-- Upload via S3 for the 50 MB limit:
-
-```bash
-aws s3 cp solution/backend/lambda-package.zip s3://<deployment-bucket>/lambda-package.zip
-aws lambda update-function-code \
-  --function-name healthstream-demo-query \
-  --s3-bucket <deployment-bucket> \
-  --s3-key lambda-package.zip \
-  --region eu-west-1
-```
+Lambda container images have a 10 GB limit (vs 250 MB for zip). The `--target lambda` stage excludes local-only deps (chromadb, sentence-transformers, torch) via `uv export --no-group local`, keeping the image under 300 MB. If the image grows:
+- Check for accidental inclusion of local deps — verify `uv export --no-group local --no-group dev` output
+- Use `docker history healthstream-rag:lambda` to identify large layers
 
 ### Ingest script reports 0 documents
 

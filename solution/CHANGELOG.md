@@ -5,6 +5,11 @@
 ### Refactoring
 
 * unify config, Dockerfile, and deps for single codebase (#28)
+  - Multi-stage Dockerfile: `--target local` / `--target lambda`
+  - Dependencies: default (core) set + optional groups `local` (chromadb, sentence-transformers) and `dev`
+  - Env profiles: `.env.local` + `.env.aws.example`
+  - Removed `Dockerfile.lambda` and `requirements-lambda.txt`
+  - Added `make demo-reset` and `make demo-teardown` targets
 
 ## [1.5.4](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.5.4) (2026-03-30)
 
@@ -103,7 +108,7 @@ All notable changes to the HealthStream RAG project.
 - Docker Compose for local development
 - Sample synthetic health data (2 patients, 13 documents)
 - Golden test set (15 Q&A pairs with ground truth)
-- 33 unit tests with full HIPAA control verification
+- 34 unit tests with full HIPAA control verification
 - 9 E2E happy path tests
 - OpenAPI 3.1 specification
 - C4 architecture diagrams (Structurizr DSL)

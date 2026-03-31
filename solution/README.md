@@ -160,13 +160,13 @@ solution/
 │   │   ├── guardrails/        # PHI check, grounding, disclaimer
 │   │   ├── models/            # Pydantic schemas
 │   │   └── config.py          # pydantic-settings configuration
-│   ├── tests/                 # 33 unit tests
+│   ├── tests/                 # 34 unit tests
 │   ├── data/                  # Sample data + golden test set
 │   └── scripts/               # Ingestion scripts
 ├── scripts/
 │   └── test-e2e.sh            # E2E happy path test
 ├── infra/
-│   └── terraform/             # AWS IaC (5 modules)
+│   └── terraform/             # AWS IaC (6 modules)
 │       ├── main.tf            # Root module + variables
 │       └── modules/
 │           ├── networking/    # VPC, PrivateLink endpoints
@@ -240,19 +240,25 @@ cp backend/.env.aws.example backend/.env  # AWS production
 
 ## AWS Deployment (Terraform)
 
-> **Note:** Terraform provisions infrastructure scaffolding. The Lambda deploys with a placeholder artifact — a CI/CD pipeline (or `make deploy-lambda`) replaces it with the real application package. `MOCK_AUTH=true` is set for the demo; production JWT validation requires Cognito integration.
+> **Note:** Bootstrap order for first-time deploy: (1) create ECR repo: `aws ecr create-repository --repository-name healthstream-rag --region eu-west-1`, (2) build and push a seed image: `make deploy` (will fail on Lambda update — that's expected), (3) `terraform apply -var="ecr_image_uri=..."` creates Lambda pointing at the ECR image, (4) `make deploy` again to update Lambda with the latest image.
 
 ```bash
-cd solution/infra/terraform
+cd solution
+
+# Option A: Makefile (recommended — passes ecr_image_uri automatically)
+make terraform-apply
+
+# Option B: Manual terraform
+cd infra/terraform
 terraform init
-terraform plan -out=healthstream.plan
+terraform plan -var="ecr_image_uri=<ACCOUNT>.dkr.ecr.eu-west-1.amazonaws.com/healthstream-rag" -out=healthstream.plan
 terraform apply healthstream.plan
 
-# After infra is up, deploy the Lambda artifact:
-# cd solution/backend && make deploy-lambda
+# After infra is up, build + push + deploy Lambda:
+# cd solution && make deploy
 ```
 
-5 modules: `networking` (VPC + PrivateLink), `compute` (Lambda + API Gateway), `storage` (S3 Vectors + DynamoDB), `security` (KMS + Cognito + IAM), `monitoring` (CloudTrail + CloudWatch).
+6 modules: `networking` (VPC + PrivateLink), `compute` (Lambda + API Gateway), `storage` (S3 Vectors + DynamoDB), `security` (KMS + Cognito + IAM), `monitoring` (CloudTrail + CloudWatch), `edge` (standalone WAFv2 Web ACL — attaches via CloudFront, not HTTP API directly).
 
 ## Feature Parity: Local Dev vs Production
 
@@ -261,15 +267,16 @@ terraform apply healthstream.plan
 | Vector Store | ChromaDB (in-process) | S3 Vectors (eu-west-1) | Done |
 | LLM Generation | Anthropic direct API | Bedrock Claude Haiku 4.5 | Done |
 | Embeddings | sentence-transformers (384d) | Bedrock Titan V2 (1024d) | Done |
-| Reranker | SimpleReranker (Jaccard) | Cohere Rerank (Bedrock) | Phase 2 |
+| BM25 Retrieval | ChromaDB corpus | DynamoDB corpus | Done |
+| Reranker | SimpleReranker (token overlap) | Cohere Rerank (Bedrock) | Phase 2 |
 | PHI Redaction | Regex patterns | AWS Comprehend Medical | Done (config-driven) |
-| Authentication | Mock (Bearer token = patient_id) | Cognito JWT (custom:patient_id) — not yet implemented | Phase 2 |
-| BM25 Retrieval | Enabled (ChromaDB corpus) | Disabled for S3 Vectors | Phase 2 (DynamoDB corpus) |
+| Authentication | Mock (Bearer token = patient_id) | Cognito JWT (custom:patient_id) | Done |
 | Data Loaders | Generic /api/v1/ingest endpoint | HealthKit/FHIR/EHR dedicated loaders | Phase 2 |
-| Infrastructure | Docker Compose | Terraform (5 modules, VPC, PrivateLink) | Done (scaffolding) |
+| Infrastructure | Docker Compose (`--target local`) | Lambda (`--target lambda`) + Terraform (6 modules) | Done |
+| Packaging | Single Dockerfile, uv dependency groups | Same Dockerfile, `uv export --no-group local --no-group dev --no-hashes` | Done |
 
 ## Testing
 
-- **33 unit tests**: Health, query, ingest, collections, vector DB, patient isolation, PHI redaction, guardrails
+- **34 unit tests**: Health, query, ingest, collections, vector DB, patient isolation, PHI redaction, guardrails
 - **9 E2E tests**: Full CRUD flow against running API
 - **HIPAA-critical**: Patient isolation verified (zero cross-patient retrieval), PHI redaction verified (SSN, phone, MRN, DOB patterns)
