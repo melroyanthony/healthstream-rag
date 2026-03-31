@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.6.0](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.6.0) (2026-03-31)
+
+### Features
+
+* HealthStream RAG — HIPAA-compliant RAG chatbot for health data
+
 ## [1.5.6](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.5.6) (2026-03-31)
 
 ### Documentation
