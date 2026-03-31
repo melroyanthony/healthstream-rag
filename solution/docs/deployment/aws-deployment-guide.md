@@ -103,7 +103,7 @@ This builds the Lambda container using the unified multi-stage Dockerfile:
 
 The same `Dockerfile` is used for both local dev (`--target local`) and Lambda (`--target lambda`). No separate `Dockerfile.lambda` or `requirements-lambda.txt` needed.
 
-### 6. Ingest sample data
+### 7. Ingest sample data
 
 ```bash
 make ingest-samples
@@ -121,7 +121,7 @@ MOCK_AUTH=true \
 uv run python scripts/ingest_samples.py
 ```
 
-### 7. Verify the deployment
+### 8. Verify the deployment
 
 Check the Lambda is healthy:
 

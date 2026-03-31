@@ -240,7 +240,7 @@ cp backend/.env.aws.example backend/.env  # AWS production
 
 ## AWS Deployment (Terraform)
 
-> **Note:** Terraform provisions infrastructure. Before `terraform apply`, create the ECR repo once: `aws ecr create-repository --repository-name healthstream-rag --region eu-west-1`. Then `make deploy` builds the container (`--target lambda`), pushes to ECR, and updates the Lambda function.
+> **Note:** Bootstrap order for first-time deploy: (1) create ECR repo: `aws ecr create-repository --repository-name healthstream-rag --region eu-west-1`, (2) build and push a seed image: `make deploy` (will fail on Lambda update — that's expected), (3) `terraform apply -var="ecr_image_uri=..."` creates Lambda pointing at the ECR image, (4) `make deploy` again to update Lambda with the latest image.
 
 ```bash
 cd solution
