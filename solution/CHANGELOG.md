@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.6](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.5.6) (2026-03-31)
+
+### Documentation
+
+* refresh architecture docs, MoSCoW, changelog, feature parity (#29)
+
 ## [1.5.5](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.5.5) (2026-03-30)
 
 ### Refactoring
