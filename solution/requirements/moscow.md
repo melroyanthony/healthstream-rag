@@ -27,7 +27,7 @@
 - [x] RAGAS evaluation framework integration
 - [x] Golden test set (15 Q&A pairs with ground truth)
 - [x] DynamoDB metadata store (session context, patient metadata)
-- [x] Structured logging (structlog)
+- [x] structlog added as dependency (structured logging integration pending)
 - [x] Patient isolation integration test
 - [x] Unified Dockerfile (multi-stage: local + lambda targets)
 - [x] Default deps + dependency groups (local + dev)
