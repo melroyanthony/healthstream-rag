@@ -45,7 +45,7 @@ C4Component
        - VectorRetriever: semantic top-20 (patient_id filtered)
        - BM25Retriever: keyword top-20 (patient_id filtered)
        - Normalize scores (min-max to 0..1)
-       - Merge + deduplicate by document ID
+       - Merge + deduplicate by source_id
    2c. Reranker: score top-5 by query relevance
    2d. Generator: Claude Haiku 4.5 with [source_id] citations
    2e. Guardrails: PHI redaction, denied topics, grounding check
