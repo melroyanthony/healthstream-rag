@@ -13,18 +13,19 @@ workspace "HealthStream RAG" "HIPAA-compliant RAG chatbot for personal health da
         # HealthStream RAG System
         healthstream = softwareSystem "HealthStream RAG" "HIPAA-compliant AI chatbot for personal health data" {
             # API Layer
-            apiGateway = container "API Gateway" "Request routing, rate limiting, auth" "AWS API Gateway + CloudFront + WAF" "AWS"
-            cognitoAuth = container "Cognito Auth" "JWT authentication (Phase 2: extract custom:patient_id claim)" "Amazon Cognito" "AWS"
+            apiGateway = container "API Gateway" "Request routing, rate limiting, auth" "AWS API Gateway HTTP API" "AWS"
+            waf = container "WAF" "Standalone REGIONAL WAFv2 Web ACL (not yet attached — requires CloudFront or REST API)" "AWS WAFv2" "AWS"
+            cognitoAuth = container "Cognito Auth" "JWT authentication with custom:patient_id claim" "Amazon Cognito" "AWS"
 
-            # Application Layer — Query (Phase 1: Implemented)
+            # Application Layer — Query
             queryOrchestrator = container "Query Orchestrator" "Hybrid retrieve, rerank, generate, cite" "FastAPI + Lambda (Python 3.13)" "Application" {
                 queryController = component "QueryController" "Orchestrates the full RAG pipeline" "Python"
                 hybridRetriever = component "HybridRetriever" "Vector + BM25 merge + dedup + score normalization" "Python"
                 vectorRetriever = component "VectorRetriever" "Semantic search via BaseVectorDB interface" "Python"
-                bm25Retriever = component "BM25Retriever" "Keyword search for medical terms (ChromaDB only)" "Python (rank-bm25)"
+                bm25Retriever = component "BM25Retriever" "Keyword search for medical terms (ChromaDB or DynamoDB corpus)" "Python (rank-bm25)"
                 reranker = component "SimpleReranker" "Query-document relevance scoring (Phase 2: Cohere Rerank)" "Python"
                 generator = component "LLMGenerator" "Claude Haiku 4.5 generation" "Bedrock (prod) / Anthropic (dev)"
-                guardrails = component "GuardrailsPipeline" "PHI check, denied topics, grounding, disclaimer" "Python"
+                guardrails = component "apply_guardrails()" "PHI redaction, denied topics, grounding check" "Python"
                 patientIsolation = component "get_patient_id" "FastAPI Depends() — extracts patient_id from JWT Bearer token" "Python"
             }
 
@@ -42,7 +43,7 @@ workspace "HealthStream RAG" "HIPAA-compliant RAG chatbot for personal health da
 
             # Data Layer
             vectorStore = container "Vector Store" "Semantic similarity search" "S3 Vectors (prod) / ChromaDB (dev)" "Database"
-            dynamoDB = container "DynamoDB" "Patient docs, sessions, metadata" "Amazon DynamoDB" "Database"
+            dynamoDB = container "DynamoDB" "Ingestion metadata, chunk previews (BM25 corpus source), query sessions" "Amazon DynamoDB" "Database"
             s3Storage = container "S3 Document Storage" "Raw encrypted health records" "Amazon S3" "Database"
 
             # Security Layer
@@ -63,9 +64,10 @@ workspace "HealthStream RAG" "HIPAA-compliant RAG chatbot for personal health da
         apiGateway -> queryOrchestrator "Invoke with patient_id" "Lambda"
 
         queryOrchestrator -> vectorStore "query_vectors(embedding, patient_id, k=20)" "boto3 / chromadb"
-        # Phase 2: queryOrchestrator -> dynamoDB "Get patient context + BM25 corpus" "boto3"
+        queryOrchestrator -> dynamoDB "Load BM25 corpus + record query sessions" "boto3"
 
         ingestionPipeline -> vectorStore "upsert_documents(chunks, embeddings, metadata)" "boto3 / chromadb"
+        ingestionPipeline -> dynamoDB "Store chunk previews/metadata for BM25 corpus" "boto3"
         ingestionPipeline -> s3Storage "Store raw encrypted records" "boto3"
 
         # Phase 2: Event-driven ingestion from external sources

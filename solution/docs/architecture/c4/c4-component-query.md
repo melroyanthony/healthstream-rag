@@ -14,12 +14,12 @@ C4Component
         Component(bm25_ret, "BM25Retriever", "Python (rank-bm25)", "Keyword search for medical terms")
         Component(reranker, "SimpleReranker", "Python", "Query-document relevance scoring")
         Component(generator, "LLMGenerator", "Bedrock / Anthropic", "Claude Haiku 4.5 response generation")
-        Component(guardrails, "GuardrailsPipeline", "Python", "PHI redaction, denied topics, grounding, disclaimer")
+        Component(guardrails, "apply_guardrails()", "Python", "PHI redaction, denied topics, grounding check")
         Component(embedder, "Embedder", "Titan V2 / sentence-transformers", "Query embedding for vector search")
     }
 
     ContainerDb(vector_store, "Vector Store", "S3 Vectors / ChromaDB")
-    ContainerDb(dynamo, "DynamoDB", "Patient context + BM25 corpus")
+    ContainerDb(dynamo, "DynamoDB", "Chunk previews (BM25 corpus) + query sessions")
     Container(api_gw, "API Gateway", "AWS API Gateway")
 
     Rel(api_gw, patient_iso, "Request with JWT")
@@ -45,7 +45,7 @@ C4Component
        - VectorRetriever: semantic top-20 (patient_id filtered)
        - BM25Retriever: keyword top-20 (patient_id filtered)
        - Normalize scores (min-max to 0..1)
-       - Merge + deduplicate by document ID
+       - Merge + deduplicate by source_id
    2c. Reranker: score top-5 by query relevance
    2d. Generator: Claude Haiku 4.5 with [source_id] citations
    2e. Guardrails: PHI redaction, denied topics, grounding check
