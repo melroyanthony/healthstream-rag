@@ -25,7 +25,7 @@ workspace "HealthStream RAG" "HIPAA-compliant RAG chatbot for personal health da
                 bm25Retriever = component "BM25Retriever" "Keyword search for medical terms (ChromaDB or DynamoDB corpus)" "Python (rank-bm25)"
                 reranker = component "SimpleReranker" "Query-document relevance scoring (Phase 2: Cohere Rerank)" "Python"
                 generator = component "LLMGenerator" "Claude Haiku 4.5 generation" "Bedrock (prod) / Anthropic (dev)"
-                guardrails = component "GuardrailsPipeline" "PHI redaction, denied topics, grounding check" "Python"
+                guardrails = component "apply_guardrails()" "PHI redaction, denied topics, grounding check" "Python"
                 patientIsolation = component "get_patient_id" "FastAPI Depends() — extracts patient_id from JWT Bearer token" "Python"
             }
 
