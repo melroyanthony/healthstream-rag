@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.6.1](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.6.1) (2026-04-01)
+
+### Bug Fixes
+
+* use RELEASE_TOKEN for release workflow push to main (#31)
+
 ## [1.6.0](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.6.0) (2026-03-31)
 
 ### Features
