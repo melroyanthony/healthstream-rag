@@ -43,7 +43,7 @@ workspace "HealthStream RAG" "HIPAA-compliant RAG chatbot for personal health da
 
             # Data Layer
             vectorStore = container "Vector Store" "Semantic similarity search" "S3 Vectors (prod) / ChromaDB (dev)" "Database"
-            dynamoDB = container "DynamoDB" "Patient docs, sessions, metadata, BM25 corpus" "Amazon DynamoDB" "Database"
+            dynamoDB = container "DynamoDB" "Ingestion metadata, chunk previews (BM25 corpus source), query sessions" "Amazon DynamoDB" "Database"
             s3Storage = container "S3 Document Storage" "Raw encrypted health records" "Amazon S3" "Database"
 
             # Security Layer
@@ -64,10 +64,10 @@ workspace "HealthStream RAG" "HIPAA-compliant RAG chatbot for personal health da
         apiGateway -> queryOrchestrator "Invoke with patient_id" "Lambda"
 
         queryOrchestrator -> vectorStore "query_vectors(embedding, patient_id, k=20)" "boto3 / chromadb"
-        queryOrchestrator -> dynamoDB "Get patient context + BM25 corpus" "boto3"
+        queryOrchestrator -> dynamoDB "Load BM25 corpus + record query sessions" "boto3"
 
         ingestionPipeline -> vectorStore "upsert_documents(chunks, embeddings, metadata)" "boto3 / chromadb"
-        ingestionPipeline -> dynamoDB "Store chunks for BM25 corpus" "boto3"
+        ingestionPipeline -> dynamoDB "Store chunk previews/metadata for BM25 corpus" "boto3"
         ingestionPipeline -> s3Storage "Store raw encrypted records" "boto3"
 
         # Phase 2: Event-driven ingestion from external sources
