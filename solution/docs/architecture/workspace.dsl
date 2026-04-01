@@ -14,7 +14,7 @@ workspace "HealthStream RAG" "HIPAA-compliant RAG chatbot for personal health da
         healthstream = softwareSystem "HealthStream RAG" "HIPAA-compliant AI chatbot for personal health data" {
             # API Layer
             apiGateway = container "API Gateway" "Request routing, rate limiting, auth" "AWS API Gateway HTTP API" "AWS"
-            waf = container "WAF" "Standalone WAFv2 Web ACL — attaches via CloudFront (not HTTP API directly)" "AWS WAFv2" "AWS"
+            waf = container "WAF" "Standalone REGIONAL WAFv2 Web ACL (not yet attached — requires CloudFront or REST API)" "AWS WAFv2" "AWS"
             cognitoAuth = container "Cognito Auth" "JWT authentication with custom:patient_id claim" "Amazon Cognito" "AWS"
 
             # Application Layer — Query
