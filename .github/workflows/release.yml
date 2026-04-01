@@ -20,6 +20,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Parse commit and determine version bump
         id: bump
@@ -112,7 +113,7 @@ jobs:
       - name: Commit, tag, and release
         if: steps.bump.outputs.bump != 'none'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
           NEW_VERSION="${{ steps.bump.outputs.new_version }}"
           TAG="v${NEW_VERSION}"
