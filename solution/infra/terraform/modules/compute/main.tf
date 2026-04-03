@@ -112,7 +112,7 @@ resource "aws_cloudwatch_metric_alarm" "dlq_messages" {
   metric_name         = "ApproximateNumberOfMessagesVisible"
   namespace           = "AWS/SQS"
   period              = 60
-  statistic           = "Sum"
+  statistic           = "Maximum"
   threshold           = 0
   alarm_description   = "Failed Lambda invocations detected in DLQ"
   dimensions = {
