@@ -222,6 +222,7 @@ cp backend/.env.aws.example backend/.env  # AWS production
 | [ADR-004](docs/decisions/ADR-004-async-queue-pattern-for-bedrock.md) | Async queue pattern for Bedrock at >500 sustained QPS |
 | [ADR-005](docs/decisions/ADR-005-hybrid-retrieval-for-medical-terminology.md) | Hybrid retrieval (vector + BM25) for medical terminology |
 | [ADR-006](docs/decisions/ADR-006-bedrock-claude-haiku-for-generation.md) | Claude Haiku 4.5 for generation ($0.0045/query) |
+| [ADR-007](docs/decisions/ADR-007-lambda-inference-optimisation.md) | Lambda inference optimisation (provisioned concurrency, DLQ, context budget) |
 
 ### Other Architecture Docs
 - [System Design](docs/architecture/system-design.md) — scale analysis, patterns, trade-offs

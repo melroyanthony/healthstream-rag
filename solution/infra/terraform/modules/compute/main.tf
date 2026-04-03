@@ -21,6 +21,11 @@ variable "allowed_origins" {
   description = "List of allowed CORS origins for the API gateway"
   type        = list(string)
 }
+variable "provisioned_concurrency" {
+  description = "Number of provisioned concurrent executions for inference Lambda (0 to disable)"
+  type        = number
+  default     = 0
+}
 
 # Lambda log group — explicit with KMS encryption and retention
 resource "aws_cloudwatch_log_group" "lambda_query" {
@@ -41,6 +46,7 @@ resource "aws_lambda_function" "query" {
   memory_size   = var.lambda_memory_mb
   timeout       = var.lambda_timeout
   architectures = ["arm64"]
+  publish       = true
 
   lifecycle {
     ignore_changes = [image_uri]
@@ -64,7 +70,53 @@ resource "aws_lambda_function" "query" {
 
   reserved_concurrent_executions = -1  # unreserved (use account default for demo)
 
+  dead_letter_config {
+    target_arn = aws_sqs_queue.dlq.arn
+  }
+
   tags = { Name = "healthstream-query" }
+}
+
+# Dead Letter Queue — audit trail for failed invocations (HIPAA)
+resource "aws_sqs_queue" "dlq" {
+  name                       = "healthstream-${var.environment}-query-dlq"
+  message_retention_seconds  = 1209600  # 14 days
+  kms_master_key_id          = var.kms_key_arn
+  tags                       = { Name = "healthstream-query-dlq" }
+}
+
+resource "aws_cloudwatch_metric_alarm" "dlq_messages" {
+  alarm_name          = "healthstream-${var.environment}-dlq-messages"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "ApproximateNumberOfMessagesVisible"
+  namespace           = "AWS/SQS"
+  period              = 60
+  statistic           = "Sum"
+  threshold           = 0
+  alarm_description   = "Failed Lambda invocations detected in DLQ"
+  dimensions = {
+    QueueName = aws_sqs_queue.dlq.name
+  }
+  tags = { Name = "healthstream-dlq-alarm" }
+}
+
+# Lambda alias + Provisioned Concurrency (eliminates cold starts)
+resource "aws_lambda_alias" "live" {
+  name             = "live"
+  function_name    = aws_lambda_function.query.function_name
+  function_version = aws_lambda_function.query.version
+
+  lifecycle {
+    ignore_changes = [function_version]
+  }
+}
+
+resource "aws_lambda_provisioned_concurrency_config" "inference" {
+  count                             = var.provisioned_concurrency > 0 ? 1 : 0
+  function_name                     = aws_lambda_function.query.function_name
+  qualifier                         = aws_lambda_alias.live.name
+  provisioned_concurrent_executions = var.provisioned_concurrency
 }
 
 # IAM policy for Lambda to access DynamoDB and S3
@@ -110,6 +162,12 @@ resource "aws_iam_role_policy" "lambda_data_access" {
         # S3 Vectors (GA Dec 2025) uses bucket-level ARNs but vector index
         # operations require wildcard — no index-level ARN scoping available yet
         Resource = "*"
+      },
+      {
+        Sid    = "DLQAccess"
+        Effect = "Allow"
+        Action = ["sqs:SendMessage"]
+        Resource = [aws_sqs_queue.dlq.arn]
       },
       {
         Sid    = "S3DocumentAccess"
@@ -175,7 +233,7 @@ resource "aws_cloudwatch_log_group" "api_access" {
 resource "aws_apigatewayv2_integration" "lambda" {
   api_id                 = aws_apigatewayv2_api.main.id
   integration_type       = "AWS_PROXY"
-  integration_uri        = aws_lambda_function.query.invoke_arn
+  integration_uri        = aws_lambda_alias.live.invoke_arn
   payload_format_version = "2.0"
 }
 
@@ -204,6 +262,7 @@ resource "aws_lambda_permission" "api_gateway" {
   statement_id  = "AllowAPIGateway"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.query.function_name
+  qualifier     = aws_lambda_alias.live.name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.main.execution_arn}/*/*"
 }

@@ -24,6 +24,20 @@ from app.retrievers.reranker import SimpleReranker
 from app.retrievers.vector_retriever import VectorRetriever
 
 
+def _budget_context(chunks: list[str], max_tokens: int) -> list[str]:
+    """Hard-cap context tokens to prevent Bedrock timeout on large documents."""
+    budgeted: list[str] = []
+    token_count = 0
+    for chunk in chunks:
+        # Rough estimate: 1 word ≈ 1.3 tokens
+        chunk_tokens = int(len(chunk.split()) * 1.3)
+        if token_count + chunk_tokens > max_tokens:
+            break
+        budgeted.append(chunk)
+        token_count += chunk_tokens
+    return budgeted
+
+
 class QueryController:
     """Orchestrates retrieve -> rerank -> generate -> cite -> audit."""
 
@@ -75,9 +89,10 @@ class QueryController:
             top_k=rerank_top_k,
         )
 
-        context_chunks = [
-            f"[{r.metadata.get('source_id', r.id)}] {r.text}" for r in reranked
-        ]
+        context_chunks = _budget_context(
+            [f"[{r.metadata.get('source_id', r.id)}] {r.text}" for r in reranked],
+            max_tokens=settings.context_token_budget,
+        )
         answer = self._generator.generate(
             system_prompt="",
             user_message=question,

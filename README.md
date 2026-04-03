@@ -60,6 +60,7 @@ graph TB
 | Async queue at >500 QPS | SQS buffer + WebSocket for Bedrock throttle prevention | [ADR-004](solution/docs/decisions/ADR-004-async-queue-pattern-for-bedrock.md) |
 | Hybrid retrieval (vector + BM25) | Medical terminology needs exact match | [ADR-005](solution/docs/decisions/ADR-005-hybrid-retrieval-for-medical-terminology.md) |
 | Claude Haiku 4.5 | Current model, $0.0045/query, lifecycle-aware | [ADR-006](solution/docs/decisions/ADR-006-bedrock-claude-haiku-for-generation.md) |
+| Lambda inference optimisation | Provisioned concurrency, DLQ, context budget | [ADR-007](solution/docs/decisions/ADR-007-lambda-inference-optimisation.md) |
 
 ---
 
@@ -123,7 +124,7 @@ healthstream-rag/
 │   │   ├── architecture/         # System design, OpenAPI, database schema
 │   │   │   ├── c4/               # 6 C4 Mermaid diagrams
 │   │   │   └── workspace.dsl    # Structurizr DSL (canonical C4 source)
-│   │   ├── decisions/            # 6 ADRs (001-006)
+│   │   ├── decisions/            # 7 ADRs (001-007)
 │   │   └── deployment/           # AWS deployment guide
 │   │
 │   ├── Makefile                  # dev, test, lint, docker, deploy, eval

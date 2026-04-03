@@ -78,6 +78,11 @@ deploy: ecr-login
 		--region $(AWS_REGION) --no-cli-pager | grep -E "CodeSha256|State"
 	@echo "==> Waiting for Lambda to be ready..."
 	aws lambda wait function-updated --function-name $(LAMBDA_FUNC) --region $(AWS_REGION)
+	@echo "==> Publishing version and updating alias..."
+	@FUNC_VERSION=$$(aws lambda publish-version --function-name $(LAMBDA_FUNC) \
+		--region $(AWS_REGION) --query 'Version' --output text) && \
+		aws lambda update-alias --function-name $(LAMBDA_FUNC) --name live \
+		--function-version $$FUNC_VERSION --region $(AWS_REGION) --no-cli-pager | grep -E "AliasArn|FunctionVersion"
 	@echo "==> Deploy complete: $(VERSION)"
 
 ## Remove old ECR images (keep latest 3)

@@ -44,6 +44,7 @@ class Settings(BaseSettings):
     retrieval_top_k: int = 20
     rerank_top_k: int = 5
     bm25_enabled: bool = True
+    context_token_budget: int = 3000
 
     # Guardrails
     grounding_threshold: float = 0.3

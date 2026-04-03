@@ -67,6 +67,12 @@ variable "lambda_timeout" {
   default     = 30
 }
 
+variable "provisioned_concurrency" {
+  description = "Provisioned concurrent executions for inference Lambda (0 to disable). Requires account concurrency limit > 12 (10 unreserved minimum + provisioned count)."
+  type        = number
+  default     = 0
+}
+
 variable "ecr_image_uri" {
   description = "ECR image URI for Lambda container"
   type        = string
@@ -125,6 +131,7 @@ module "compute" {
   s3_vectors_bucket_name    = module.storage.s3_vectors_bucket_name
   ecr_image_uri             = var.ecr_image_uri
   allowed_origins           = var.allowed_origins
+  provisioned_concurrency   = var.provisioned_concurrency
 }
 
 module "monitoring" {
