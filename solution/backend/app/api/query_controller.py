@@ -29,29 +29,34 @@ def _estimate_tokens(text: str) -> int:
     return max(1, int(len(text.split()) * 1.3)) if text.strip() else 0
 
 
+def _tokens_from_word_count(n: int) -> int:
+    """Estimate token count from a known word count (avoids re-splitting)."""
+    return max(1, int(n * 1.3)) if n > 0 else 0
+
+
 def _truncate_to_budget(text: str, max_tokens: int) -> str:
     """Truncate text to fit within a token budget."""
     words = text.split()
     if not words or max_tokens <= 0:
         return ""
-    # Binary search for the largest prefix that fits
-    lo, hi, best = 1, len(words), ""
+    lo, hi, best = 1, len(words), 0
     while lo <= hi:
         mid = (lo + hi) // 2
-        candidate = " ".join(words[:mid])
-        if _estimate_tokens(candidate) <= max_tokens:
-            best = candidate
+        if _tokens_from_word_count(mid) <= max_tokens:
+            best = mid
             lo = mid + 1
         else:
             hi = mid - 1
-    return best
+    return " ".join(words[:best])
 
 
 def _budget_context(chunks: list[str], max_tokens: int) -> list[str]:
     """Hard-cap context tokens to prevent Bedrock timeout on large documents.
 
-    Always includes at least one chunk (truncated if necessary) so retrieval
-    is never dropped entirely for a single oversized chunk.
+    When chunks is non-empty and max_tokens is positive, always includes at
+    least one chunk (truncated if necessary) so retrieval is never dropped
+    entirely for a single oversized chunk. Returns empty list when there are
+    no chunks or the configured token budget is non-positive.
     """
     if not chunks or max_tokens <= 0:
         return []
