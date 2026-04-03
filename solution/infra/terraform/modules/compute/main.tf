@@ -88,6 +88,23 @@ resource "aws_sqs_queue" "dlq" {
   tags                      = { Name = "healthstream-query-dlq" }
 }
 
+resource "aws_sqs_queue_policy" "dlq" {
+  queue_url = aws_sqs_queue.dlq.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid       = "AllowLambdaServiceToSendMessages"
+      Effect    = "Allow"
+      Principal = { Service = "lambda.amazonaws.com" }
+      Action    = "sqs:SendMessage"
+      Resource  = aws_sqs_queue.dlq.arn
+      Condition = {
+        ArnEquals = { "aws:SourceArn" = aws_lambda_function.query.arn }
+      }
+    }]
+  })
+}
+
 resource "aws_cloudwatch_metric_alarm" "dlq_messages" {
   alarm_name          = "healthstream-${var.environment}-dlq-messages"
   comparison_operator = "GreaterThanThreshold"
@@ -165,12 +182,6 @@ resource "aws_iam_role_policy" "lambda_data_access" {
         # S3 Vectors (GA Dec 2025) uses bucket-level ARNs but vector index
         # operations require wildcard — no index-level ARN scoping available yet
         Resource = "*"
-      },
-      {
-        Sid    = "DLQAccess"
-        Effect = "Allow"
-        Action = ["sqs:SendMessage"]
-        Resource = [aws_sqs_queue.dlq.arn]
       },
       {
         Sid    = "S3DocumentAccess"

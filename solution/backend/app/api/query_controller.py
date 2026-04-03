@@ -24,22 +24,52 @@ from app.retrievers.reranker import SimpleReranker
 from app.retrievers.vector_retriever import VectorRetriever
 
 
+def _estimate_tokens(text: str) -> int:
+    """Estimate token count from text (1 word ~ 1.3 tokens)."""
+    return max(1, int(len(text.split()) * 1.3)) if text.strip() else 0
+
+
+def _truncate_to_budget(text: str, max_tokens: int) -> str:
+    """Truncate text to fit within a token budget."""
+    words = text.split()
+    if not words or max_tokens <= 0:
+        return ""
+    # Binary search for the largest prefix that fits
+    lo, hi, best = 1, len(words), ""
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        candidate = " ".join(words[:mid])
+        if _estimate_tokens(candidate) <= max_tokens:
+            best = candidate
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return best
+
+
 def _budget_context(chunks: list[str], max_tokens: int) -> list[str]:
     """Hard-cap context tokens to prevent Bedrock timeout on large documents.
 
     Always includes at least one chunk (truncated if necessary) so retrieval
     is never dropped entirely for a single oversized chunk.
     """
-    if not chunks:
+    if not chunks or max_tokens <= 0:
         return []
     budgeted: list[str] = []
     token_count = 0
     for chunk in chunks:
-        chunk_tokens = int(len(chunk.split()) * 1.3)
-        if token_count + chunk_tokens > max_tokens and budgeted:
+        remaining = max_tokens - token_count
+        if remaining <= 0:
             break
-        budgeted.append(chunk)
-        token_count += chunk_tokens
+        chunk_tokens = _estimate_tokens(chunk)
+        if chunk_tokens <= remaining:
+            budgeted.append(chunk)
+            token_count += chunk_tokens
+        else:
+            truncated = _truncate_to_budget(chunk, remaining)
+            if truncated:
+                budgeted.append(truncated)
+            break
     return budgeted
 
 
