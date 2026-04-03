@@ -81,8 +81,15 @@ deploy: ecr-login
 	@echo "==> Publishing version and updating alias..."
 	@FUNC_VERSION=$$(aws lambda publish-version --function-name $(LAMBDA_FUNC) \
 		--region $(AWS_REGION) --query 'Version' --output text) && \
-		aws lambda update-alias --function-name $(LAMBDA_FUNC) --name live \
-		--function-version $$FUNC_VERSION --region $(AWS_REGION) --no-cli-pager | grep -E "AliasArn|FunctionVersion"
+		if aws lambda get-alias --function-name $(LAMBDA_FUNC) --name live \
+			--region $(AWS_REGION) --no-cli-pager > /dev/null 2>&1; then \
+			aws lambda update-alias --function-name $(LAMBDA_FUNC) --name live \
+				--function-version $$FUNC_VERSION --region $(AWS_REGION) --no-cli-pager | grep -E "AliasArn|FunctionVersion"; \
+		else \
+			echo "==> Alias 'live' not found; creating it..."; \
+			aws lambda create-alias --function-name $(LAMBDA_FUNC) --name live \
+				--function-version $$FUNC_VERSION --region $(AWS_REGION) --no-cli-pager | grep -E "AliasArn|FunctionVersion"; \
+		fi
 	@echo "==> Deploy complete: $(VERSION)"
 
 ## Remove old ECR images (keep latest 3)
