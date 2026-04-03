@@ -70,6 +70,9 @@ resource "aws_lambda_function" "query" {
 
   reserved_concurrent_executions = -1  # unreserved (use account default for demo)
 
+  # DLQ applies to async invocations only. API Gateway invokes synchronously,
+  # so HTTP failures are returned directly to the caller. DLQ captures failures
+  # from async invocation sources (e.g., future SQS/EventBridge triggers).
   dead_letter_config {
     target_arn = aws_sqs_queue.dlq.arn
   }
@@ -77,12 +80,12 @@ resource "aws_lambda_function" "query" {
   tags = { Name = "healthstream-query" }
 }
 
-# Dead Letter Queue — audit trail for failed invocations (HIPAA)
+# Dead Letter Queue — captures async invocation failures
 resource "aws_sqs_queue" "dlq" {
-  name                       = "healthstream-${var.environment}-query-dlq"
-  message_retention_seconds  = 1209600  # 14 days
-  kms_master_key_id          = var.kms_key_arn
-  tags                       = { Name = "healthstream-query-dlq" }
+  name                      = "healthstream-${var.environment}-query-dlq"
+  message_retention_seconds = 1209600  # 14 days
+  sqs_managed_sse_enabled   = true
+  tags                      = { Name = "healthstream-query-dlq" }
 }
 
 resource "aws_cloudwatch_metric_alarm" "dlq_messages" {

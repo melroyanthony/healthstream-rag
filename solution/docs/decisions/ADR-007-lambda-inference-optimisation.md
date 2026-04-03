@@ -11,7 +11,7 @@ The HealthStream RAG inference Lambda has a ~6.5s cold start (VPC ENI attach ~1.
 
 ### Adopted (this PR)
 
-1. **Provisioned Concurrency (2 instances)** — Keeps 2 warm Lambda containers ready. Eliminates cold starts entirely for baseline traffic. Cost: ~$5.80/month.
+1. **Provisioned Concurrency (configurable, disabled by default)** — Terraform variable `provisioned_concurrency` (default 0). Set to 2+ to keep warm containers ready, eliminating cold starts. Requires AWS account concurrency limit >12 (10 unreserved minimum + provisioned count). Cost when enabled: ~$5.80/month for 2 instances.
 
 2. **Dead Letter Queue (SQS)** — Failed invocations route to an SQS DLQ with KMS encryption and 14-day retention. CloudWatch alarm on DLQ depth. Required for HIPAA audit trail of failures.
 

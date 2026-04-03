@@ -161,7 +161,7 @@ Expected response:
 | Resource | Config | Est. monthly cost |
 |----------|--------|-------------------|
 | Lambda | 1024 MB, 30s timeout, 1000 invocations/month | < $0.01 |
-| Lambda Provisioned Concurrency | 2 instances × 1024 MB × 730 hours | ~$5.80 |
+| Lambda Provisioned Concurrency | Disabled by default. Enable: `-var="provisioned_concurrency=2"` | +$5.80 if enabled |
 | API Gateway HTTP API | 1000 requests/month | < $0.01 |
 | S3 Vectors bucket | < 1 GB stored | ~$0.02 |
 | S3 documents bucket | < 100 MB | ~$0.01 |
@@ -170,7 +170,8 @@ Expected response:
 | KMS key | 1 key, minimal API calls | ~$1.00 |
 | VPC interface endpoints | 4 endpoints (Bedrock, Comprehend, Logs, S3 Vectors) | ~$1.50 |
 | SQS DLQ | Free tier | $0.00 |
-| **Total** | | **~$8.85** |
+| **Total (default)** | Without provisioned concurrency | **~$3.05** |
+| **Total (optimised)** | With provisioned concurrency (2 instances) | **~$8.85** |
 
 > VPC interface endpoints dominate the cost (~$0.01/hour each). No NAT Gateway is
 > provisioned — all AWS service traffic uses PrivateLink (HIPAA data plane isolation).

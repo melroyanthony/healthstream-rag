@@ -25,13 +25,18 @@ from app.retrievers.vector_retriever import VectorRetriever
 
 
 def _budget_context(chunks: list[str], max_tokens: int) -> list[str]:
-    """Hard-cap context tokens to prevent Bedrock timeout on large documents."""
+    """Hard-cap context tokens to prevent Bedrock timeout on large documents.
+
+    Always includes at least one chunk (truncated if necessary) so retrieval
+    is never dropped entirely for a single oversized chunk.
+    """
+    if not chunks:
+        return []
     budgeted: list[str] = []
     token_count = 0
     for chunk in chunks:
-        # Rough estimate: 1 word ≈ 1.3 tokens
         chunk_tokens = int(len(chunk.split()) * 1.3)
-        if token_count + chunk_tokens > max_tokens:
+        if token_count + chunk_tokens > max_tokens and budgeted:
             break
         budgeted.append(chunk)
         token_count += chunk_tokens
