@@ -173,8 +173,9 @@ Expected response:
 | **Total (default)** | Without provisioned concurrency | **~$3.05** |
 | **Total (optimised)** | With provisioned concurrency (2 instances) | **~$8.85** |
 
-> VPC interface endpoints dominate the cost (~$0.01/hour each). No NAT Gateway is
-> provisioned — all AWS service traffic uses PrivateLink (HIPAA data plane isolation).
+> Costs assume AWS free tier applied (Lambda, DynamoDB, SQS). VPC interface endpoints
+> dominate the cost (~$0.01/hour each). No NAT Gateway is provisioned — all AWS
+> service traffic uses PrivateLink (HIPAA data plane isolation).
 
 ---
 

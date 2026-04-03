@@ -30,12 +30,15 @@ def _tokens_from_word_count(n: int) -> int:
 
 
 def _budget_context(chunks: list[str], max_tokens: int) -> list[str]:
-    """Hard-cap context tokens to prevent Bedrock timeout on large documents.
+    """Best-effort cap on context size using an estimated token heuristic.
 
-    When chunks is non-empty and max_tokens is positive, always includes at
-    least one chunk (truncated if necessary) so retrieval is never dropped
-    entirely for a single oversized chunk. Returns empty list when there are
-    no chunks or the configured token budget is non-positive.
+    Uses _tokens_from_word_count() as a conservative approximation rather
+    than a model tokenizer, so max_tokens is an estimated budget, not a
+    strict hard limit. When chunks is non-empty and max_tokens is positive,
+    always includes at least one chunk (truncated if necessary) so retrieval
+    is never dropped entirely; this minimum-inclusion can slightly exceed
+    the budget in edge cases. Returns empty list when there are no chunks
+    or the configured token budget is non-positive.
     """
     if not chunks or max_tokens <= 0:
         return []

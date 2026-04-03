@@ -49,12 +49,15 @@ The HealthStream RAG inference Lambda has a ~6.5s cold start (VPC ENI attach ~1.
 
 ## Cost Impact
 
+Costs assume AWS free tier applied (consistent with deployment guide).
+
 | Item | Before | After | Delta |
 |------|--------|-------|-------|
-| Lambda on-demand | ~$0.05/month | ~$0.05/month | $0.00 |
+| Lambda on-demand | < $0.01/month | < $0.01/month | $0.00 |
 | Provisioned Concurrency (2 × 1024MB) | $0.00 | ~$5.80/month | +$5.80 |
-| SQS DLQ | $0.00 | ~$0.00 (free tier) | $0.00 |
-| **Total** | **~$3.05/month** | **~$8.85/month** | **+$5.80** |
+| SQS DLQ | $0.00 | $0.00 (free tier) | $0.00 |
+| **Total (default, no provisioned)** | **~$3.05/month** | **~$3.05/month** | **$0.00** |
+| **Total (with provisioned concurrency)** | **~$3.05/month** | **~$8.85/month** | **+$5.80** |
 
 ## Consequences
 
