@@ -25,13 +25,13 @@ from app.retrievers.vector_retriever import VectorRetriever
 
 
 def _estimate_tokens(text: str) -> int:
-    """Estimate token count from text (1 word ~ 1.3 tokens)."""
-    return max(1, int(len(text.split()) * 1.3)) if text.strip() else 0
+    """Conservative token estimate from text (rounds up, 1 word ~ 1.3 tokens)."""
+    return max(1, -(-int(len(text.split()) * 13) // 10)) if text.strip() else 0
 
 
 def _tokens_from_word_count(n: int) -> int:
-    """Estimate token count from a known word count (avoids re-splitting)."""
-    return max(1, int(n * 1.3)) if n > 0 else 0
+    """Conservative token estimate from word count (rounds up)."""
+    return max(1, -(-int(n * 13) // 10)) if n > 0 else 0
 
 
 def _truncate_to_budget(text: str, max_tokens: int) -> str:

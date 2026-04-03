@@ -122,6 +122,8 @@ def test_query_respects_context_token_budget(client, monkeypatch):
     assert response.status_code == 200
     data = response.json()
     assert "answer" in data
+    assert data["metadata"]["retrieval_count"] > 0, "Budget test must exercise retrieval"
+    assert len(data["citations"]) > 0, "Budget test must produce at least one citation"
 
 
 def test_query_respects_patient_isolation(client):
