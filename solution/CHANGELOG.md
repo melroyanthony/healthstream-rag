@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.6.2](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.6.2) (2026-04-03)
+
+### Performance
+
+* Lambda inference optimisation — alias, DLQ, context budget, ADR-007 (#33)
+
 ## [1.6.1](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.6.1) (2026-04-01)
 
 ### Bug Fixes
