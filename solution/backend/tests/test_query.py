@@ -97,6 +97,35 @@ def test_query_deduplicates_citations_by_source_id(client):
     )
 
 
+def test_query_respects_context_token_budget(client, monkeypatch):
+    """Should return a response even when context budget is very small."""
+    monkeypatch.setattr("app.api.query_controller.settings.context_token_budget", 10)
+    client.post(
+        "/api/v1/ingest",
+        headers=AUTH,
+        json={
+            "documents": [
+                {
+                    "text": "Sleep session with a very long description " * 50,
+                    "source_type": "healthkit",
+                    "source_id": "budget-test-001",
+                },
+            ],
+        },
+    )
+
+    response = client.post(
+        "/api/v1/query",
+        headers=AUTH,
+        json={"question": "What was my sleep score?"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert "answer" in data
+    assert data["metadata"]["retrieval_count"] > 0, "Budget test must exercise retrieval"
+    assert len(data["citations"]) > 0, "Budget test must produce at least one citation"
+
+
 def test_query_respects_patient_isolation(client):
     """Should only return data for the authenticated patient."""
     client.post(

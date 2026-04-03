@@ -21,6 +21,16 @@ variable "allowed_origins" {
   description = "List of allowed CORS origins for the API gateway"
   type        = list(string)
 }
+variable "provisioned_concurrency" {
+  description = "Number of provisioned concurrent executions for inference Lambda (0 to disable)"
+  type        = number
+  default     = 0
+
+  validation {
+    condition     = var.provisioned_concurrency >= 0 && floor(var.provisioned_concurrency) == var.provisioned_concurrency
+    error_message = "provisioned_concurrency must be a non-negative integer (0 to disable)."
+  }
+}
 
 # Lambda log group — explicit with KMS encryption and retention
 resource "aws_cloudwatch_log_group" "lambda_query" {
@@ -41,6 +51,7 @@ resource "aws_lambda_function" "query" {
   memory_size   = var.lambda_memory_mb
   timeout       = var.lambda_timeout
   architectures = ["arm64"]
+  publish       = true
 
   lifecycle {
     ignore_changes = [image_uri]
@@ -64,7 +75,73 @@ resource "aws_lambda_function" "query" {
 
   reserved_concurrent_executions = -1  # unreserved (use account default for demo)
 
+  # DLQ applies to async invocations only. API Gateway invokes synchronously,
+  # so HTTP failures are returned directly to the caller. DLQ captures failures
+  # from async invocation sources (e.g., future SQS/EventBridge triggers).
+  dead_letter_config {
+    target_arn = aws_sqs_queue.dlq.arn
+  }
+
   tags = { Name = "healthstream-query" }
+}
+
+# Dead Letter Queue — captures async invocation failures
+resource "aws_sqs_queue" "dlq" {
+  name                      = "healthstream-${var.environment}-query-dlq"
+  message_retention_seconds = 1209600  # 14 days
+  sqs_managed_sse_enabled   = true
+  tags                      = { Name = "healthstream-query-dlq" }
+}
+
+resource "aws_sqs_queue_policy" "dlq" {
+  queue_url = aws_sqs_queue.dlq.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid       = "AllowLambdaServiceToSendMessages"
+      Effect    = "Allow"
+      Principal = { Service = "lambda.amazonaws.com" }
+      Action    = "sqs:SendMessage"
+      Resource  = aws_sqs_queue.dlq.arn
+      Condition = {
+        ArnEquals = { "aws:SourceArn" = aws_lambda_function.query.arn }
+      }
+    }]
+  })
+}
+
+resource "aws_cloudwatch_metric_alarm" "dlq_messages" {
+  alarm_name          = "healthstream-${var.environment}-dlq-messages"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "ApproximateNumberOfMessagesVisible"
+  namespace           = "AWS/SQS"
+  period              = 60
+  statistic           = "Maximum"
+  threshold           = 0
+  alarm_description   = "Failed Lambda invocations detected in DLQ"
+  dimensions = {
+    QueueName = aws_sqs_queue.dlq.name
+  }
+  tags = { Name = "healthstream-dlq-alarm" }
+}
+
+# Lambda alias + Provisioned Concurrency (eliminates cold starts)
+resource "aws_lambda_alias" "live" {
+  name             = "live"
+  function_name    = aws_lambda_function.query.function_name
+  function_version = aws_lambda_function.query.version
+
+  lifecycle {
+    ignore_changes = [function_version]
+  }
+}
+
+resource "aws_lambda_provisioned_concurrency_config" "inference" {
+  count                             = var.provisioned_concurrency > 0 ? 1 : 0
+  function_name                     = aws_lambda_function.query.function_name
+  qualifier                         = aws_lambda_alias.live.name
+  provisioned_concurrent_executions = var.provisioned_concurrency
 }
 
 # IAM policy for Lambda to access DynamoDB and S3
@@ -175,7 +252,7 @@ resource "aws_cloudwatch_log_group" "api_access" {
 resource "aws_apigatewayv2_integration" "lambda" {
   api_id                 = aws_apigatewayv2_api.main.id
   integration_type       = "AWS_PROXY"
-  integration_uri        = aws_lambda_function.query.invoke_arn
+  integration_uri        = aws_lambda_alias.live.invoke_arn
   payload_format_version = "2.0"
 }
 
@@ -204,6 +281,7 @@ resource "aws_lambda_permission" "api_gateway" {
   statement_id  = "AllowAPIGateway"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.query.function_name
+  qualifier     = aws_lambda_alias.live.name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.main.execution_arn}/*/*"
 }
