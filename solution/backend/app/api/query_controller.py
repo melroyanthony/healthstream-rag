@@ -24,34 +24,9 @@ from app.retrievers.reranker import SimpleReranker
 from app.retrievers.vector_retriever import VectorRetriever
 
 
-def _estimate_tokens(text: str) -> int:
-    """Conservative token estimate from text (rounds up, 1 word ~ 1.3 tokens)."""
-    return max(1, -(-int(len(text.split()) * 13) // 10)) if text.strip() else 0
-
-
 def _tokens_from_word_count(n: int) -> int:
-    """Conservative token estimate from word count (rounds up)."""
+    """Conservative token estimate from word count (rounds up, 1 word ~ 1.3 tokens)."""
     return max(1, -(-int(n * 13) // 10)) if n > 0 else 0
-
-
-def _truncate_to_budget(text: str, max_tokens: int) -> str:
-    """Truncate text to fit within a token budget.
-
-    Always returns at least one word when text is non-empty and max_tokens > 0,
-    even if that single word exceeds the heuristic estimate.
-    """
-    words = text.split()
-    if not words or max_tokens <= 0:
-        return ""
-    lo, hi, best = 1, len(words), 1  # best=1 guarantees at least one word
-    while lo <= hi:
-        mid = (lo + hi) // 2
-        if _tokens_from_word_count(mid) <= max_tokens:
-            best = mid
-            lo = mid + 1
-        else:
-            hi = mid - 1
-    return " ".join(words[:best])
 
 
 def _budget_context(chunks: list[str], max_tokens: int) -> list[str]:
@@ -70,14 +45,22 @@ def _budget_context(chunks: list[str], max_tokens: int) -> list[str]:
         remaining = max_tokens - token_count
         if remaining <= 0:
             break
-        chunk_tokens = _estimate_tokens(chunk)
+        words = chunk.split()
+        chunk_tokens = _tokens_from_word_count(len(words))
         if chunk_tokens <= remaining:
             budgeted.append(chunk)
             token_count += chunk_tokens
         else:
-            truncated = _truncate_to_budget(chunk, remaining)
-            if truncated:
-                budgeted.append(truncated)
+            # Truncate using pre-split words (avoids second split)
+            lo, hi, best = 1, len(words), 1
+            while lo <= hi:
+                mid = (lo + hi) // 2
+                if _tokens_from_word_count(mid) <= remaining:
+                    best = mid
+                    lo = mid + 1
+                else:
+                    hi = mid - 1
+            budgeted.append(" ".join(words[:best]))
             break
     return budgeted
 
