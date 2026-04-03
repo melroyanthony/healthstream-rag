@@ -35,11 +35,15 @@ def _tokens_from_word_count(n: int) -> int:
 
 
 def _truncate_to_budget(text: str, max_tokens: int) -> str:
-    """Truncate text to fit within a token budget."""
+    """Truncate text to fit within a token budget.
+
+    Always returns at least one word when text is non-empty and max_tokens > 0,
+    even if that single word exceeds the heuristic estimate.
+    """
     words = text.split()
     if not words or max_tokens <= 0:
         return ""
-    lo, hi, best = 1, len(words), 0
+    lo, hi, best = 1, len(words), 1  # best=1 guarantees at least one word
     while lo <= hi:
         mid = (lo + hi) // 2
         if _tokens_from_word_count(mid) <= max_tokens:
