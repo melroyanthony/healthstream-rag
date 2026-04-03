@@ -71,6 +71,11 @@ variable "provisioned_concurrency" {
   description = "Provisioned concurrent executions for inference Lambda (0 to disable). Requires account concurrency limit > 12 (10 unreserved minimum + provisioned count)."
   type        = number
   default     = 0
+
+  validation {
+    condition     = var.provisioned_concurrency >= 0 && floor(var.provisioned_concurrency) == var.provisioned_concurrency
+    error_message = "provisioned_concurrency must be a non-negative integer (0 or greater)."
+  }
 }
 
 variable "ecr_image_uri" {

@@ -25,6 +25,11 @@ variable "provisioned_concurrency" {
   description = "Number of provisioned concurrent executions for inference Lambda (0 to disable)"
   type        = number
   default     = 0
+
+  validation {
+    condition     = var.provisioned_concurrency >= 0 && floor(var.provisioned_concurrency) == var.provisioned_concurrency
+    error_message = "provisioned_concurrency must be a non-negative integer (0 to disable)."
+  }
 }
 
 # Lambda log group — explicit with KMS encryption and retention
