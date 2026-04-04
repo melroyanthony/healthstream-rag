@@ -196,28 +196,26 @@ paths:
       description: |
         Uses a registered data loader (healthkit, fhir, ehr) to parse and
         ingest source-specific data. PHI redaction and embedding are applied
-        automatically.
+        automatically. Documents are ingested into the default collection.
       operationId: ingestFromSource
       security:
         - bearerAuth: []
+      parameters:
+        - in: query
+          name: source_type
+          required: true
+          schema:
+            type: string
+            enum: [healthkit, fhir, ehr]
+          description: Registered source loader to use for parsing
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [source_type, raw_data]
-              properties:
-                source_type:
-                  type: string
-                  enum: [healthkit, fhir, ehr]
-                raw_data:
-                  type: object
-                  additionalProperties: true
-                  description: Raw source data (format depends on source_type)
-                collection_name:
-                  type: string
-                  default: "default"
+              additionalProperties: true
+              description: Raw source data (format depends on source_type)
       responses:
         "200":
           description: Documents ingested via loader
@@ -227,13 +225,22 @@ paths:
                 $ref: "#/components/schemas/IngestResponse"
         "400":
           description: Invalid source data or unknown source_type
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /api/v1/loaders:
     get:
       tags: [ingest]
       summary: List registered data loaders
-      description: Returns the available data source loaders and their count.
+      description: |
+        Returns the available data source loaders and their count.
+        In production, requires Authorization header (API Gateway JWT authorizer
+        applies to all routes). Unauthenticated only in local dev.
       operationId: listLoaders
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Available loaders
