@@ -132,7 +132,7 @@ All notable changes to the HealthStream RAG project.
 - Docker Compose for local development
 - Sample synthetic health data (2 patients, 13 documents)
 - Golden test set (15 Q&A pairs with ground truth)
-- 34 unit tests with full HIPAA control verification
+- 35 unit tests with full HIPAA control verification
 - 9 E2E happy path tests
 - OpenAPI 3.1 specification
 - C4 architecture diagrams (Structurizr DSL)

@@ -160,7 +160,7 @@ solution/
 │   │   ├── guardrails/        # PHI check, grounding, disclaimer
 │   │   ├── models/            # Pydantic schemas
 │   │   └── config.py          # pydantic-settings configuration
-│   ├── tests/                 # 34 unit tests
+│   ├── tests/                 # 35 unit tests
 │   ├── data/                  # Sample data + golden test set
 │   └── scripts/               # Ingestion scripts
 ├── scripts/
@@ -227,7 +227,7 @@ cp backend/.env.aws.example backend/.env  # AWS production
 ### Other Architecture Docs
 - [System Design](docs/architecture/system-design.md) — scale analysis, patterns, trade-offs
 - [Database Schema](docs/architecture/database-schema.md) — vector store + DynamoDB tables
-- [OpenAPI Spec](docs/architecture/openapi.yaml) — 6 endpoints, full schemas
+- [OpenAPI Spec](docs/architecture/openapi.yaml) — 8 endpoints, full schemas
 
 ## Key Design Decisions
 
@@ -278,6 +278,6 @@ terraform apply healthstream.plan
 
 ## Testing
 
-- **34 unit tests**: Health, query, ingest, collections, vector DB, patient isolation, PHI redaction, guardrails
+- **35 unit tests**: Health, query, ingest, collections, vector DB, patient isolation, PHI redaction, guardrails
 - **9 E2E tests**: Full CRUD flow against running API
 - **HIPAA-critical**: Patient isolation verified (zero cross-patient retrieval), PHI redaction verified (SSN, phone, MRN, DOB patterns)

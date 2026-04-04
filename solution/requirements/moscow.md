@@ -16,7 +16,7 @@
 - [x] Guardrails pipeline (PHI redaction, denied-topic checks, grounding; disclaimer appended in API response layer)
 - [x] Docker Compose (FastAPI + ChromaDB)
 - [x] Pydantic request/response models at API boundaries
-- [x] Unit tests (34 tests, HIPAA control verification)
+- [x] Unit tests (35 tests, HIPAA control verification)
 
 ## Should Have (Important, not critical)
 
