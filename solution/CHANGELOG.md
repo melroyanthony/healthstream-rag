@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.6.3](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.6.3) (2026-04-04)
+
+### Bug Fixes
+
+* final docs audit — test count 35, OpenAPI 8 endpoints (#34)
+
 ## [1.6.2](https://github.com/melroyanthony/healthstream-rag/releases/tag/v1.6.2) (2026-04-03)
 
 ### Performance
