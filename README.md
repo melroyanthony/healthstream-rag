@@ -113,7 +113,7 @@ healthstream-rag/
 │   │   │   ├── loaders/          # HealthKit, FHIR, EHR data loaders
 │   │   │   ├── middleware/       # Patient isolation + PHI redaction
 │   │   │   └── guardrails/       # PHI check, grounding, disclaimer
-│   │   ├── tests/                # 34 unit tests
+│   │   ├── tests/                # 35 unit tests
 │   │   ├── data/                 # Sample data + 15 golden test Q&A pairs
 │   │   └── scripts/              # Evaluation, ingestion, Lambda packaging
 │   │
@@ -192,7 +192,7 @@ cp solution/backend/.env.aws.example solution/backend/.env
 | [C4 Deployment](solution/docs/architecture/c4/c4-deployment.md) | AWS deployment topology |
 | [HIPAA Controls](solution/docs/architecture/c4/hipaa-controls.md) | 4-layer defense model |
 | [System Design](solution/docs/architecture/system-design.md) | Scale analysis, patterns, trade-offs |
-| [OpenAPI Spec](solution/docs/architecture/openapi.yaml) | 6 endpoints, full schemas |
+| [OpenAPI Spec](solution/docs/architecture/openapi.yaml) | 8 endpoints, full schemas |
 | [Database Schema](solution/docs/architecture/database-schema.md) | Vector store + DynamoDB tables |
 | [AWS Deployment Guide](solution/docs/deployment/aws-deployment-guide.md) | Step-by-step deploy |
 
@@ -203,7 +203,7 @@ cp solution/backend/.env.aws.example solution/backend/.env
 ```bash
 cd solution/backend
 
-# Unit tests (34 tests, ~5s)
+# Unit tests (35 tests, ~5s)
 MOCK_AUTH=true uv run pytest tests/ -v
 
 # RAGAS evaluation (15 golden Q&A pairs)

@@ -23,7 +23,7 @@ The HealthStream RAG inference Lambda has a ~6.5s cold start (VPC ENI attach ~1.
 
 5. **FastAPI + Mangum retained** — The problem statement recommends removing FastAPI/Mangum for a raw handler. We retain it because:
    - ~50ms overhead (Mangum) is negligible vs ~2000ms Bedrock inference
-   - 34 unit tests run against FastAPI test client
+   - 35 unit tests run against FastAPI test client
    - Pydantic validation at API boundaries (HIPAA input sanitisation)
    - OpenAPI spec auto-generated
    - Same codebase for local dev (`--target local`) and Lambda (`--target lambda`)

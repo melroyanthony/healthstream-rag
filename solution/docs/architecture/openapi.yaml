@@ -189,6 +189,68 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /api/v1/ingest/source:
+    post:
+      tags: [ingest]
+      summary: Ingest from a registered data source loader
+      description: |
+        Uses a registered data loader (healthkit, fhir, ehr) to parse and
+        ingest source-specific data. PHI redaction and embedding are applied
+        automatically.
+      operationId: ingestFromSource
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [source_type, raw_data]
+              properties:
+                source_type:
+                  type: string
+                  enum: [healthkit, fhir, ehr]
+                raw_data:
+                  type: object
+                  additionalProperties: true
+                  description: Raw source data (format depends on source_type)
+                collection_name:
+                  type: string
+                  default: "default"
+      responses:
+        "200":
+          description: Documents ingested via loader
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestResponse"
+        "400":
+          description: Invalid source data or unknown source_type
+
+  /api/v1/loaders:
+    get:
+      tags: [ingest]
+      summary: List registered data loaders
+      description: Returns the available data source loaders and their count.
+      operationId: listLoaders
+      responses:
+        "200":
+          description: Available loaders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  loaders:
+                    type: array
+                    items:
+                      type: string
+                    example: ["ehr", "fhir", "healthkit"]
+                  count:
+                    type: integer
+                    example: 3
+
 components:
   securitySchemes:
     bearerAuth:
